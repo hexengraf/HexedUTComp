@@ -1,5 +1,5 @@
 
-class NewNet_RocketFire extends UTComp_RocketFire;
+class NewNet_RocketFire extends RocketFire;
 
 var float PingDT;
 var bool bUseEnhancedNetCode;
@@ -26,7 +26,7 @@ function PlayFiring()
 {
    super.PlayFiring();
 
-   if(Level.NetMode != NM_Client || !BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+   if(Level.NetMode != NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
        return;
    if(!bSkipNextEffect)
        CheckFireEffect();

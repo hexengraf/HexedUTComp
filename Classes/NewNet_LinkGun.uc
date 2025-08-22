@@ -1,5 +1,5 @@
 
-class NewNet_LinkGun extends UTComp_LinkGun
+class NewNet_LinkGun extends LinkGun
 	HideDropDown
 	CacheExempt;
 
@@ -31,7 +31,7 @@ function DisableNet()
 //// client only ////
 simulated event ClientStartFire(int Mode)
 {
-    if(Level.NetMode!=NM_Client || !BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+    if(Level.NetMode!=NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
         super.ClientStartFire(mode);
     else
         NewNet_ClientStartFire(mode);
@@ -90,5 +90,4 @@ DefaultProperties
 {
     FireModeClass(0)=class'NewNet_LinkAltFire'
     FireModeClass(1)=class'NewNet_LinkFire'
-    PickupClass=Class'NewNet_LinkGunPickup'
 }

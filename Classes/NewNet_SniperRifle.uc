@@ -1,5 +1,5 @@
 
-class NewNet_SniperRifle extends UTComp_SniperRifle
+class NewNet_SniperRifle extends SniperRifle
     HideDropDown
 	CacheExempt;
 
@@ -60,7 +60,7 @@ simulated function ClientStartFire(int mode)
     }
     else
     {
-        if(BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+        if((UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
             NewNet_ClientStartFire(mode);
         else
             super(Weapon).ClientStartFire(mode);
@@ -263,5 +263,4 @@ simulated function bool StartFire(int Mode)
 defaultproperties
 {
     FireModeClass(0) = class'NewNet_SniperFire'
-    PickupClass=Class'NewNet_SniperRiflePickup'
 }

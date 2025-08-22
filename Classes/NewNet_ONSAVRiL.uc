@@ -1,9 +1,8 @@
 
-class NewNet_ONSAVRiL extends UTComp_ONSAVRiL
+class NewNet_ONSAVRiL extends ONSAVRiL
     HideDropDown
 	CacheExempt;
 
 DefaultProperties
 {
-    PickupClass=Class'NewNet_ONSAVRiLPickup'
 }

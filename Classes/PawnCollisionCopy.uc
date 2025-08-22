@@ -246,7 +246,7 @@ function AddPawnToList(Pawn Other)
     // Already got it, dont bother.
     // snarf this was commented out, uncommenting since it might be needed?
     // if(Other == CopiedPawn)
-    //    return;         
+    //    return;
 
     if(next==None)
     {

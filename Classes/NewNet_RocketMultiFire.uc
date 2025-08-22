@@ -1,5 +1,5 @@
 
-class NewNet_RocketMultiFire extends UTComp_RocketMultiFire;
+class NewNet_RocketMultiFire extends RocketMultiFire;
 
 var vector OldInstigatorLocation;
 var Vector OldInstigatorEyePosition;
@@ -19,7 +19,7 @@ var bool bUseEnhancedNetCode;
 function PlayFiring()
 {
     super.PlayFiring();
-    if(Level.NetMode != NM_Client || !BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+    if(Level.NetMode != NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
         return;
     CheckFireEffect();
 }

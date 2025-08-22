@@ -2,7 +2,7 @@
 //-----------------------------------------------------------
 //
 //-----------------------------------------------------------
-class NewNet_FlakCannon extends UTComp_FlakCannon
+class NewNet_FlakCannon extends FlakCannon
     HideDropDown
 	CacheExempt;
 
@@ -49,7 +49,7 @@ function DisableNet()
 //// client only ////
 simulated event ClientStartFire(int Mode)
 {
-    if(Level.NetMode!=NM_Client || !BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+    if(Level.NetMode!=NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
         super.ClientStartFire(mode);
     else
         NewNet_ClientStartFire(mode);
@@ -260,5 +260,4 @@ defaultproperties
 {
     FireModeClass(0)=class'NewNet_FlakFire'
     FireModeClass(1)=class'NewNet_FlakAltFire'
-    PickupClass=Class'NewNet_FlakCannonPickup'
 }

@@ -1,5 +1,5 @@
 
-class NewNet_MiniGunFire extends UTComp_MiniGunFire;
+class NewNet_MiniGunFire extends MiniGunFire;
 
 var float PingDT;
 var bool bUseEnhancedNetCode;

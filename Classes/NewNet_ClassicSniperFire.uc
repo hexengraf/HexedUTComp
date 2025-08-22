@@ -1,5 +1,5 @@
 
-class NewNet_ClassicSniperFire extends UTComp_ClassicSniperFire;
+class NewNet_ClassicSniperFire extends ClassicSniperFire;
 
 var float PingDT;
 var bool bUseEnhancedNetCode;

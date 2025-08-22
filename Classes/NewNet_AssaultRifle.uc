@@ -1,5 +1,5 @@
 
-class NewNet_AssaultRifle extends UTComp_AssaultRifle
+class NewNet_AssaultRifle extends AssaultRifle
 	HideDropDown
 	CacheExempt;
 
@@ -10,24 +10,25 @@ const MAX_PROJECTILE_FUDGE = 0.075;
 
 replication
 {
-    reliable if( Role<ROLE_Authority )
+    reliable if (Role < ROLE_Authority)
         NewNet_ServerStartFire;
-    unreliable if(Role == Role_Authority)
+
+    unreliable if (Role == Role_Authority)
         DispatchClientEffect;
 }
 
 function DisableNet()
 {
-    NewNet_AssaultFire(FireMode[0]).bUseEnhancedNetCode = false;
+    NewNet_AssaultFire(FireMode[0]).bUseEnhancedNetCode = False;
     NewNet_AssaultFire(FireMode[0]).PingDT = 0.00;
-    NewNet_AssaultGrenade(FireMode[1]).bUseEnhancedNetCode = false;
+    NewNet_AssaultGrenade(FireMode[1]).bUseEnhancedNetCode = False;
     NewNet_AssaultGrenade(FireMode[1]).PingDT = 0.00;
 }
 
 //// client only ////
 simulated event ClientStartFire(int Mode)
 {
-    if(Level.NetMode!=NM_Client || !BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+    if(Level.NetMode!=NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
         super.ClientStartFire(mode);
     else
         NewNet_ClientStartFire(mode);
@@ -74,7 +75,6 @@ function NewNet_ServerStartFire(byte Mode, byte ClientTimeStamp, float DT)
     ServerStartFire(Mode);
 }
 
-
 simulated function DispatchClientEffect(Vector V, rotator R)
 {
     if(Level.NetMode != NM_Client)
@@ -86,5 +86,4 @@ DefaultProperties
 {
     FireModeClass(0)=class'NewNet_AssaultFire'
     FireModeClass(1)=class'NewNet_AssaultGrenade'
-    PickupClass=Class'NewNet_AssaultRiflePickup'
 }

@@ -1,4 +1,4 @@
-class NewNet_MiniGun extends UTComp_MiniGun
+class NewNet_MiniGun extends MiniGun
 	HideDropDown
 	CacheExempt;
 
@@ -22,7 +22,7 @@ function DisableNet()
 //// client only ////
 simulated event ClientStartFire(int Mode)
 {
-    if(Level.NetMode!=NM_Client || !BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+    if(Level.NetMode!=NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
         super.ClientStartFire(mode);
     else
         NewNet_ClientStartFire(mode);
@@ -74,5 +74,4 @@ DefaultProperties
 {
     FireModeClass(0)=class'NewNet_MiniGunFire'
     FireModeClass(1)=class'NewNet_MiniGunAltFire'
-    PickupClass=Class'NewNet_MiniGunPickup'
 }

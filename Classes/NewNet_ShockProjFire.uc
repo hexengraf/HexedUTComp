@@ -1,5 +1,5 @@
 
-class NewNet_ShockProjFire extends UTComp_ShockProjFire;
+class NewNet_ShockProjFire extends ShockProjFire;
 
 var class<Projectile> FakeProjectileClass;
 
@@ -8,7 +8,7 @@ var FakeProjectileManager FPM;
 function PlayFiring()
 {
     super.PlayFiring();
-    if(Level.NetMode != NM_Client || !BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+    if(Level.NetMode != NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
        return;
     CheckFireEffect();
 }

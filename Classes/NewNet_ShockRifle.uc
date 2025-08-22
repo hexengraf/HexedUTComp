@@ -1,5 +1,5 @@
 
-class NewNet_ShockRifle extends UTComp_ShockRifle
+class NewNet_ShockRifle extends ShockRifle
 	HideDropDown
 	CacheExempt;
 
@@ -37,7 +37,7 @@ function DisableNet()
 //// client only ////
 simulated event ClientStartFire(int Mode)
 {
-    if(Level.NetMode!=NM_Client || !BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet() || NewNet_ShockBeamFire(FireMode[Mode]) == None)
+    if(Level.NetMode!=NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode) || NewNet_ShockBeamFire(FireMode[Mode]) == None)
         super.ClientStartFire(mode);
     else
         NewNet_ClientStartFire(mode);
@@ -258,19 +258,12 @@ function bool IsReasonable(Vector V)
 simulated function SpawnBeamEffect(vector HitLocation, vector HitNormal, vector Start, rotator Dir, int reflectnum)
 {
     local ShockBeamEffect Beam;
-   local int TeamNum;
 
-    TeamNum=255;
-    if(Instigator != None && Instigator.Controller != None)
-        TeamNum = class'TeamColorManager'.static.GetTeamNum(Instigator.Controller,Level);
-        
     if(bClientDemoNetFunc)
     {
         Start.Z = Start.Z - 64.0;
     }
     Beam = Spawn(class'NewNet_Client_ShockBeamEffect',,, Start, Dir);
-   if(Beam != None && TeamColorShockBeamEffect(Beam) != None)
-        TeamColorShockBeamEffect(Beam).TeamNum = TeamNum;
 
     if (ReflectNum != 0) Beam.Instigator = None; // prevents client side repositioning of beam start
        Beam.AimAt(HitLocation, HitNormal);
@@ -281,5 +274,4 @@ DefaultProperties
 {
     FireModeClass(0)=class'NewNet_ShockBeamFire'
     FireModeClass(1)=class'NewNet_ShockProjFire'
-    PickupClass=Class'NewNet_ShockRiflePickup'
 }

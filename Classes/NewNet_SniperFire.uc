@@ -2,7 +2,7 @@
 //-----------------------------------------------------------
 //   First weapon implimentation for the lag compensated firing.
 //-----------------------------------------------------------
-class NewNet_SniperFire extends UTComp_SniperFire;
+class NewNet_SniperFire extends SniperFire;
 
 var bool bUseReplicatedInfo;
 var rotator savedRot;
@@ -25,7 +25,7 @@ function PlayFiring()
 {
    super.PlayFiring();
 
-   if(Level.NetMode != NM_Client || !BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+   if(Level.NetMode != NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
        return;
    if(!bSkipNextEffect)
        CheckFireEffect();

@@ -2,7 +2,7 @@
 //-----------------------------------------------------------
 //
 //-----------------------------------------------------------
-class NewNet_LinkAltFire extends UTComp_LinkAltFire;
+class NewNet_LinkAltFire extends LinkAltFire;
 
 var float PingDT;
 var bool bUseEnhancedNetCode;
@@ -24,21 +24,13 @@ function Projectile SpawnProjectile(Vector Start, Rotator Dir)
     local LinkProjectile Proj;
     local vector HitLocation, HitNormal, End;
     local actor Other;
-    local UTComp_PRI uPRI;
     local float f,g;
 
-    if(Level.NetMode == NM_Client && BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+    if(Level.NetMode == NM_Client && (UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
         return SpawnFakeProjectile(Start,Dir);
     if(!bUseEnhancedNetCode)
     {
        return super.SpawnProjectile(Start,Dir);
-    }
-
-    if(weapon.owner.IsA('xPawn') && xPawn(Weapon.Owner).Controller!=None)
-    {
-        uPRI=class'UTComp_Util'.static.GetUTCompPRIFor(xPawn(Weapon.Owner).Controller);
-        if(uPRI!=None)
-            uPRI.NormalWepStatsPrim[9]+=2;
     }
 
     Start += Vector(Dir) * 10.0 * LinkGun(Weapon).Links;
@@ -203,7 +195,7 @@ function PlayFiring()
 {
    super.PlayFiring();
 
-   if(Level.NetMode != NM_Client || !BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+   if(Level.NetMode != NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
        return;
    CheckFireEffect();
 }

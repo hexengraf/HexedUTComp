@@ -1,5 +1,5 @@
 
-class NewNet_AssaultGrenade extends UTComp_AssaultGrenade;
+class NewNet_AssaultGrenade extends AssaultGrenade;
 
 var float PingDT;
 var bool bUseEnhancedNetCode;

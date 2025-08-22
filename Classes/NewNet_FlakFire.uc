@@ -2,7 +2,7 @@
 //-----------------------------------------------------------
 //
 //-----------------------------------------------------------
-class NewNet_FlakFire extends UTComp_FlakFire;
+class NewNet_FlakFire extends FlakFire;
 
 var float PingDT;
 var bool bUseEnhancedNetCode;
@@ -30,7 +30,7 @@ function PlayFiring()
 {
    super.PlayFiring();
 
-   if(Level.NetMode != NM_Client || !BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+   if(Level.NetMode != NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
        return;
    if(!bSkipNextEffect)
        CheckFireEffect();
@@ -320,12 +320,12 @@ function projectile SpawnProjectile(Vector Start, Rotator Dir)
                 //the proj to spawn if it makes it to the end
                 g = Fmin(pingdt, f);
 
-                //Where will it be after deltaF, Dir byRef for next tick                
+                //Where will it be after deltaF, Dir byRef for next tick
                 if(f >= pingDT)
                     End = Start + Extrapolate(Dir, (pingDT-f+PROJ_TIMESTEP));
                 else
                     End = Start + Extrapolate(Dir, PROJ_TIMESTEP);
-                
+
                 //Put pawns there
                 TimeTravel(pingdt - g);
                 //RadiusTimeTravel(pingDT-g);

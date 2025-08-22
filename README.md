@@ -1,4 +1,27 @@
-# WSUTComp
+# HexedUTComp
+
+Fork of WSUTComp made to work together with HexedUT and significantly reduce the amount of features.
+Releases are bundled together with HexedUT (see [HexedUT2k4](https://github.com/hexengraf/HexedUT2k4)).
+
+Features kept:
+* Enhanced netcode (NewNet weapons)
+* New EyeHeight algorithm
+  * View smoothing
+* Disable double damage
+* Number of Assault Rifle's grenades on spawn
+* Colored death messages
+* Timed overtime
+* Starting health
+* Starting shield
+
+All other features were removed.
+For widescreen fixes, use [foxWSFix](https://github.com/alexstrout/foxWSFix-UT2k4).
+
+Other changes:
+* The GUI was reworked to be displayed through HexedUT's menu.
+* Command line options were removed.
+
+## Old README
 
 Wicked Sick UTComp, based on [UTCompOmni 1.71](https://github.com/zenakuten/UTCompOmni)
 
@@ -11,10 +34,10 @@ V15
 V14
 - Add starting health, armor as options
 - show tick rate in server info
-- cleanup webadmin 
+- cleanup webadmin
 - revert moving server configs to own file
 - fix bug where you received awards for shooting dead bodies
-- revert 1.7a flak primary change and use 1.8c deaod fix 
+- revert 1.7a flak primary change and use 1.8c deaod fix
 - fix the extra countdown at warmup end
 
 V13
@@ -58,7 +81,7 @@ V7
 - hit sounds/indicators for spectators spectating a vehicle
 - hit sounds/indicators for spectators on node damage
 - Add award sounds for 'air rocket', 'impressive combo'
-- Add sound when you get headshotted 
+- Add sound when you get headshotted
 
 V6
 - Fix bug with bright skins when switching teams
@@ -80,8 +103,8 @@ V5
 V4
 - fix friendly fire damage indicators
 - fix negative damage indicators
-- Add alternate MoveErrorAccum algorithm, default disabled.  
-- Add more knobs for movement (gliding movement, NetMoveDelta, MaxSavedMoves, MaxResponseTime, MoveErrorAccum) 
+- Add alternate MoveErrorAccum algorithm, default disabled.
+- Add more knobs for movement (gliding movement, NetMoveDelta, MaxSavedMoves, MaxResponseTime, MoveErrorAccum)
 - move movement config to separate config section
 - Add missing NetMoveDelta, MaxSavedMoves to WebAdmin
 - fix negative damage showing when changing view target
@@ -89,7 +112,7 @@ V4
 - add config bChargedWeaponsNoSpawnProtection to disable spawn protection when charging rox, bio
 - fix flak primary/secondary visual showing too many/wrong shards
 
-V3 
+V3
 - Fix 'Use UTComp style gliding movement' logic, was backwards
 - Fix damage indicators for vehicles
 - Add damage indicators for power nodes
@@ -99,7 +122,7 @@ V3
 - Add option to disable team from knocking you around in a vehicle
 - Fix kick momentum for avril when online
 - disable dynamic netspeed
-- Add NetMoveDelta config 
+- Add NetMoveDelta config
 - Add MaxSavedMoves config to webadmin
 
 V2
@@ -189,7 +212,7 @@ UTCompOmni
 - Remove custom RoundEnded and GameEnded player states from ONSPlus, use defaults instead
 
 1.54
-- copy most stuff from ceonss 1.38 version that doesn't have unreg issue, including - 
+- copy most stuff from ceonss 1.38 version that doesn't have unreg issue, including -
 - remove bAlwaysRelvant change from 1.53 (didn't fix anything)
 - remove NetUpdateMaxNetSpeed option (didnt' fix anything)
 - remove recent flak cannon changes (didnt' fix anything)
@@ -202,7 +225,7 @@ UTCompOmni
 - use bAlwaysRelevant for UTComp_xPawn
 
 1.52
-- New config value NetUpdateMaxNetSpeed.  This limits the netspeed used when calculating player movements.  Default is 10000 (default UT max net speed for > 16 players) 
+- New config value NetUpdateMaxNetSpeed.  This limits the netspeed used when calculating player movements.  Default is 10000 (default UT max net speed for > 16 players)
 
 1.51
 - revert an old change I made to pawncollisioncopy
@@ -228,7 +251,7 @@ UTCompOmni
 - Change CheckScore function to use while loop instead of for loop to avoid possible None reference.
 
 1.38
-- Add whitelist feature.  
+- Add whitelist feature.
 
 New config values:
    bUseWhitelist=False
@@ -239,9 +262,9 @@ If 'bEnableWhitelist' is true, white list GUI is enabled.  Admins will see a new
 
 If 'bUseWhitelist' is true, white list is enabled.  Only players with matching PlayerIDs are allowed into the game.  Default is false.
 
-Banned players will see an auto kicked message when they try to join the server.  Change WhitelistBanMessage accordingly.  
+Banned players will see an auto kicked message when they try to join the server.  Change WhitelistBanMessage accordingly.
 
-The white list is an ini file called 'UTComp_Whitelist.ini' in the System folder.  
+The white list is an ini file called 'UTComp_Whitelist.ini' in the System folder.
 
 [UTCompOmni.UTComp_Whitelist]
 WhitelistEntry=PlayerID1
@@ -262,7 +285,7 @@ etc...
 - cleanup some logs
 
 1.34
-- Add bSilentAdmin config value. When set, don't show 'ADMIN' string in scoreboard.  Default is true.  
+- Add bSilentAdmin config value. When set, don't show 'ADMIN' string in scoreboard.  Default is true.
 
 
 1.33
@@ -271,7 +294,7 @@ etc...
 1.32
 - unselect show utcomps stats when selecting default scoreboard
 - default show stats to false
-- fix mult colored names on ESC -> Scoreboard 
+- fix mult colored names on ESC -> Scoreboard
 
 1.31
 - fix spectate context menu not working
@@ -282,7 +305,7 @@ etc...
 
 1.30
 - Fix bug where hitsounds on nodes didn't always work with vehicles
-- Add 'spectate' context menu 
+- Add 'spectate' context menu
 
 1.29
 - Add 'SetPreferredExit' command (from ONSPlus) for vehicles
@@ -290,7 +313,7 @@ etc...
 
 To use SetPreferredExit, you'll need to bind a key to it and combine with the use command, e.g.
 
-in User.ini - 
+in User.ini -
 Q=SetPreferredExit Left 1 | Use
 E=SetPreferredExit Right 1 | Use
 
@@ -351,14 +374,14 @@ VehicleData=(Name="ONSRV",RadarColor=(B=32,G=32,R=0,A=255))
 - remove changes from 1.19 and 1.20 and fix crashing issue caused by PawnCollisionCopy on vehicles. TODO Verify this change does not cause more unreg hits on vehicles
 
 1.20
- - add bGameRelevant=true flag to PawnCollisionCopy class 
+ - add bGameRelevant=true flag to PawnCollisionCopy class
  - add override for PreBeginPlay event for PawnCollisionCopy class
 
 1.19
 - Add override for 'alwayskeep' function that was showing in logs after crash
 
 1.18
-- Add config value bNodeHealBonusForConstructor.  If true, player starting the node gets NodeHealBonusPct when linking.  Default is false.  
+- Add config value bNodeHealBonusForConstructor.  If true, player starting the node gets NodeHealBonusPct when linking.  Default is false.
 - yet another attempt at fix team color issue caused by evenmatch shuffling teams at round start
 
 1.17
@@ -378,7 +401,7 @@ VehicleData=(Name="ONSRV",RadarColor=(B=32,G=32,R=0,A=255))
 - fix players running around after game ended
 - add new config value bNodeHealBonusForLockedNodes.  This turns on the node heal bonus for locked nodes.  Default is false.
 
-1.13 
+1.13
 - fix for team color issue
 
 1.12
@@ -393,7 +416,7 @@ VehicleData=(Name="ONSRV",RadarColor=(B=32,G=32,R=0,A=255))
 
 1.10
 - Merge all features we want from ONSPlusOmni into UTCompOmni
-- ONSPlus features include 
+- ONSPlus features include
   - Node isolation bonus for severing nodes (default is 20% of node points)
   - Draw vehicles on radar map
   - shared link bonus so multiple linkers get points
@@ -404,11 +427,11 @@ VehicleData=(Name="ONSRV",RadarColor=(B=32,G=32,R=0,A=255))
 - fix issue where teleport was not working
 - fix issue where dodge was not working
 
-1.9 
-- Fix issue where team change kept wrong team color.  bEnemyBasedSkins ands bEnemyBasedModels are hard coded now.  Changing gui values has no effect. 
+1.9
+- Fix issue where team change kept wrong team color.  bEnemyBasedSkins ands bEnemyBasedModels are hard coded now.  Changing gui values has no effect.
 - Fix issue where ONSPlusOmni HUD conflicted with UTComp HUD
 - Default to bright skins
 
 
-1.8c 
+1.8c
 - Initial Release

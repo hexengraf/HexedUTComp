@@ -1,4 +1,4 @@
-class NewNet_AssaultFire extends UTComp_AssaultFire;
+class NewNet_AssaultFire extends AssaultFire;
 
 var float PingDT;
 var bool bUseEnhancedNetCode;

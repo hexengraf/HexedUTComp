@@ -1,4 +1,4 @@
-class NewNet_SuperShockBeamFire extends UTComp_SuperShockBeamFire;
+class NewNet_SuperShockBeamFire extends SuperShockBeamFire;
 
 var bool bUseReplicatedInfo;
 var rotator savedRot;
@@ -17,7 +17,7 @@ function PlayFiring()
 {
    super.PlayFiring();
 
-   if(Level.NetMode != NM_Client || !BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+   if(Level.NetMode != NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
        return;
    if(!bSkipNextEffect)
        CheckFireEffect();

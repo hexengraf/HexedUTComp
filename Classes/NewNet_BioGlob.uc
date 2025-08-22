@@ -1,5 +1,5 @@
 
-class NewNet_BioGlob extends TeamColorBioGlob
+class NewNet_BioGlob extends BioGlob
 	HideDropDown
 	CacheExempt;
 
@@ -46,10 +46,7 @@ simulated function PostNetBeginPlay()
 
 simulated function bool CheckOwned()
 {
-    local UTComp_Settings S;
-    foreach AllObjects(class'UTComp_Settings', S)
-        break;
-    if(S != none && S.bEnableEnhancedNetCode==false)
+    if(!class'UTComp_xPawn'.Default.bEnhancedNetCode)
         return false;
     bOwned = (PC!=None && PC.Pawn!=None && PC.Pawn == Instigator);
     return bOwned;

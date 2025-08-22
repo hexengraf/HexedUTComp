@@ -18,43 +18,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 class NewNet_PRI extends LinkedReplicationInfo;
 
+var float PingTweenTime;
 var float PredictedPing;
 var float PingSendTime;
 var bool bPingReceived;
 var int numPings;
-var UTComp_ServerReplicationInfo RepInfo;
-
-var float PingTweenTime;
 
 replication
 {
-    reliable if(Role<Role_Authority)
+    reliable if (Role < Role_Authority)
         Ping;
-    reliable if(Role == Role_Authority && bNetOwner)
+
+    reliable if (Role == Role_Authority && bNetOwner)
         Pong;
-}
-
-simulated function PostBeginPlay()
-{
-    super.PostBeginPlay();
-
-    if(RepInfo == None)
-        ForEach DynamicActors(class'UTComp_ServerReplicationInfo', RepInfo)
-            break;
-    
-    if(RepInfo != none)
-    {
-        if(RepInfo.NewNetUpdateFrequency > 0)
-        {
-            NetUpdateFrequency=RepInfo.NewNetUpdateFrequency;
-        }
-
-        if(RepInfo.PingTweenTime > 0)
-        {
-            PingTweenTime=RepInfo.PingTweenTime;
-        }
-
-    }
 }
 
 simulated function Ping()
@@ -64,31 +40,34 @@ simulated function Ping()
 
 simulated function Pong()
 {
-    bPingReceived = true;
-    PredictedPing = (2.0*PredictedPing + (Level.TimeSeconds - PingSendTime))/PingTweenTime;
-    default.predictedping=predictedping;
+    bPingReceived = True;
+    PredictedPing = (2.0 * PredictedPing + (Level.TimeSeconds - PingSendTime)) / PingTweenTime;
+    Default.PredictedPing = PredictedPing;
     numPings++;
     if(NumPings < 8)
-        default.PredictedPing = (Level.TimeSeconds - PingSendTime);
+    {
+        Default.PredictedPing = (Level.TimeSeconds - PingSendTime);
+    }
 }
 
-simulated function Tick(float deltatime)
+simulated function Tick(float DeltaTime)
 {
-    super.Tick(deltatime);
-    if(Level.NetMode!=NM_Client)
+    if (Level.NetMode != NM_Client)
+    {
         return;
-    if(bPingReceived && Level.TimeSeconds > PingSendTime + PingTweenTime)
+    }
+    if (bPingReceived && Level.TimeSeconds > PingSendTime + PingTweenTime)
     {
         PingSendTime = Level.TimeSeconds;
-        bPingReceived = false;
+        bPingReceived = False;
         Ping();
     }
 }
 
 defaultproperties
 {
-     bPingReceived=True
-     NetUpdateFrequency=200.000000
-     NetPriority=5.000000
-     PingTweenTime=3.0
+    NetUpdateFrequency=200
+    NetPriority=5
+    PingTweenTime=3.0
+    bPingReceived=True
 }

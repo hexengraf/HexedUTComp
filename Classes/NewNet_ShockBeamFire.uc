@@ -1,5 +1,5 @@
 
-class NewNet_ShockBeamFire extends UTComp_ShockBeamFire;
+class NewNet_ShockBeamFire extends ShockBeamFire;
 
 var bool bUseReplicatedInfo;
 var rotator savedRot;
@@ -18,7 +18,7 @@ function PlayFiring()
 {
    super.PlayFiring();
 
-   if(Level.NetMode != NM_Client || !BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+   if(Level.NetMode != NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
        return;
    if(!bSkipNextEffect)
        CheckFireEffect();
@@ -397,19 +397,12 @@ simulated function SpawnClientBeamEffect(Vector Start, Rotator Dir, Vector HitLo
 function SpawnBeamEffect(Vector Start, Rotator Dir, Vector HitLocation, Vector HitNormal, int ReflectNum)
 {
     local ShockBeamEffect Beam;
-    local int TeamNum;
-
-    TeamNum=255;
-    if(Instigator != None && Instigator.Controller != None)
-        TeamNum = class'TeamColorManager'.static.GetTeamNum(Instigator.Controller,Level);
 
     if(!bUseEnhancedNetCode)
     {
         if (Weapon != None)
         {
-            Beam = Weapon.Spawn(Class'TeamColorShockBeamEffect',,, Start, Dir);
-            if(Beam != None && TeamColorShockBeamEffect(Beam) != None)
-                TeamColorShockBeamEffect(Beam).TeamNum = TeamNum;
+            Beam = Weapon.Spawn(Class'ShockBeamEffect',,, Start, Dir);
 
             if (ReflectNum != 0) Beam.Instigator = None; // prevents client side repositioning of beam start
                 Beam.AimAt(HitLocation, HitNormal);
@@ -420,8 +413,6 @@ function SpawnBeamEffect(Vector Start, Rotator Dir, Vector HitLocation, Vector H
     if (Weapon != None)
     {
         Beam = Weapon.Spawn(BeamEffectClass,Weapon.Owner,, Start, Dir);
-       if(Beam != None && TeamColorShockBeamEffect(Beam) != None)
-            TeamColorShockBeamEffect(Beam).TeamNum = TeamNum;        
         if (ReflectNum != 0) Beam.Instigator = None; // prevents client side repositioning of beam start
             Beam.AimAt(HitLocation, HitNormal);
     }

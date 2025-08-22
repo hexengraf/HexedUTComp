@@ -1,5 +1,5 @@
 
-class NewNet_ShockProjectile extends UTComp_ShockProjectile;
+class NewNet_ShockProjectile extends ShockProjectile;
 
 var PlayerController PC;
 var vector DesiredDeltaFake;
@@ -52,12 +52,7 @@ simulated function DoSetLoc(Vector V)
 
 simulated function bool CheckOwned()
 {
-    local UTComp_Settings S;
-    //foreach AllObjects(class'UTComp_Settings', S)
-    //    break;
-    S = class'UTComp_Settings'.default.instance;
-
-    if(S != none && S.bEnableEnhancedNetCode==false)
+    if(!class'UTComp_xPawn'.Default.bEnhancedNetCode)
         return false;
     bOwned = (PC!=None && PC.Pawn!=None && PC.Pawn == Instigator);
     return bOwned;

@@ -2,7 +2,7 @@
 //-----------------------------------------------------------
 //
 //-----------------------------------------------------------
-class NewNet_FlakAltFire extends UTComp_FlakAltFire;
+class NewNet_FlakAltFire extends FlakAltFire;
 
 var float PingDT;
 var bool bUseEnhancedNetCode;
@@ -28,7 +28,7 @@ function PlayFiring()
 {
    super.PlayFiring();
 
-   if(Level.NetMode != NM_Client || !BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+   if(Level.NetMode != NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
        return;
    if(!bSkipNextEffect)
        CheckFireEffect();
@@ -147,7 +147,7 @@ function projectile SpawnProjectile(Vector Start, Rotator Dir)
     local vector End, HitLocation, HitNormal, VZ;
     local actor Other;
 
-    if(Level.NetMode == NM_Client && BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+    if(Level.NetMode == NM_Client && (UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
         return SpawnFakeProjectile(Start,Dir);
 
     if(!bUseEnhancedNetCode)

@@ -1,5 +1,5 @@
 
-class NewNet_ClassicSniperRifle extends UTComp_ClassicSniperRifle
+class NewNet_ClassicSniperRifle extends ClassicSniperRifle
     HideDropDown
 	CacheExempt;
 
@@ -34,7 +34,7 @@ simulated function ClientStartFire(int mode)
 
 simulated event SuperClientStartFire(int Mode)
 {
-    if(Level.NetMode!=NM_Client || !BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+    if(Level.NetMode!=NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
         super(Weapon).ClientStartFire(mode);
     else
         NewNet_ClientStartFire(mode);
@@ -78,6 +78,5 @@ function NewNet_ServerStartFire(byte Mode, byte ClientTimeStamp, float dt)
 
 DefaultProperties
 {
-     PickupClass=Class'NewNet_ClassicSniperRiflePickup'
-     FireModeClass(0)=class'NewNet_ClassicSniperFire'
+    FireModeClass(0)=class'NewNet_ClassicSniperFire'
 }

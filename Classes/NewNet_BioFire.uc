@@ -1,5 +1,5 @@
 
-class NewNet_BioFire extends UTComp_BioFire;
+class NewNet_BioFire extends BioFire;
 
 var float PingDT;
 var bool bUseEnhancedNetCode;
@@ -26,7 +26,7 @@ function projectile SpawnProjectile(Vector Start, Rotator Dir)
     local actor Other;
 
 
-    if(Level.NetMode == NM_Client && BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+    if(Level.NetMode == NM_Client && (UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
         return SpawnFakeProjectile(Start,Dir);
 
     if(!bUseEnhancedNetCode)
@@ -217,7 +217,7 @@ function PlayFiring()
 {
    super.PlayFiring();
 
-   if(Level.NetMode != NM_Client || !BS_xPlayer(Level.GetLocalPlayerController()).UseNewNet())
+   if(Level.NetMode != NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
        return;
    CheckFireEffect();
 }
