@@ -1,5 +1,7 @@
 class MutUTComp extends HxBaseMutator;
 
+#exec AUDIO IMPORT FILE=Sounds\HitSound.wav
+
 const AVERDT_SEND_PERIOD = 4.00;
 
 var config bool bAllowNewNetWeapons;
@@ -34,6 +36,7 @@ simulated function PreBeginPlay()
     Super.PreBeginPlay();
     ServerPreBeginPlay();
     class'UTComp_HxGUIPanel'.static.AddToMenu();
+    class'HxHitEffects'.static.AddHitSound(Sound'HitSound');
 }
 
 function ServerPreBeginPlay()
