@@ -4,7 +4,7 @@ var config bool bEnhancedNetCode;
 var config bool bNewEyeHeightAlgorithm;
 var config bool bViewSmoothing;
 
-var bool bAllowNewEyeHeightAlgorithm;
+var NewNet_PRI PRI;
 // UpdateEyeHeight related
 var EPhysics OldPhysics2;
 var vector OldLocation;
@@ -19,9 +19,6 @@ replication
 
     reliable if(Role == ROLE_Authority)
         ClientResetNetcode;
-
-    reliable if (Role == ROLE_Authority)
-        bAllowNewEyeHeightAlgorithm;
 }
 
 simulated event PostNetBeginPlay()
@@ -51,7 +48,7 @@ event UpdateEyeHeight(float DeltaTime)
     local vector Delta;
 
     if (Controller == None || Level.NetMode == NM_DedicatedServer || bTearOff
-        || !bAllowNewEyeHeightAlgorithm || !bNewEyeHeightAlgorithm)
+        || !PRI.bAllowNewEyeHeightAlgorithm || !bNewEyeHeightAlgorithm)
     {
         Super.UpdateEyeHeight(DeltaTime);
         return;
@@ -132,6 +129,10 @@ function ServerChangedWeapon(Weapon OldWeapon, Weapon NewWeapon)
 simulated function Tick(float DeltaTime)
 {
     Super.Tick(DeltaTime);
+    if (PRI == None)
+    {
+        PRI = class'NewNet_PRI'.static.GetPRI(Controller);
+    }
     // fix annoying bug where sometimes weapon instigator gets set to none
     // due to race condition in replication
     if(Level.NetMode == NM_Client && Weapon != None && Weapon.Instigator != Self)
@@ -217,5 +218,4 @@ defaultproperties
     bEnhancedNetCode=True
     bNewEyeHeightAlgorithm=True
     bViewSmoothing=True
-    bAllowNewEyeHeightAlgorithm=False
 }

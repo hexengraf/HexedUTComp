@@ -18,7 +18,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 class NewNet_PRI extends LinkedReplicationInfo;
 
+var bool bAllowNewNetWeapons;
+var bool bAllowNewEyeHeightAlgorithm;
+var bool bDisableDoubleDamage;
+var bool bColoredDeathMessages;
+var int NumGrenadesOnSpawn;
+var int StartingHealth;
+var int StartingArmor;
+var int TimedOvertime;
 var float PingTweenTime;
+var float PawnCollisionHistoryLength;
+var MutUTComp UTComp;
+var PlayerController PC;
+
 var float PredictedPing;
 var float PingSendTime;
 var bool bPingReceived;
@@ -26,11 +38,122 @@ var int numPings;
 
 replication
 {
-    reliable if (Role < Role_Authority)
+    reliable if (Role < ROLE_Authority)
         Ping;
 
-    reliable if (Role == Role_Authority && bNetOwner)
+    reliable if (Role == ROLE_Authority && bNetOwner)
         Pong;
+
+    reliable if (Role == ROLE_Authority)
+        bAllowNewNetWeapons, bAllowNewEyeHeightAlgorithm, bDisableDoubleDamage,
+        bColoredDeathMessages, NumGrenadesOnSpawn, StartingHealth, StartingArmor,
+        TimedOvertime, PingTweenTime, PawnCollisionHistoryLength;
+
+    reliable if (Role < ROLE_Authority)
+        ServerSetAllowNewNetWeapons, ServerSetAllowNewEyeHeightAlgorithm,
+        ServerSetDisableDoubleDamage, ServerSetColoredDeathMessages, ServerSetNumGrenadesOnSpawn,
+        ServerSetStartingHealth, ServerSetStartingArmor, ServerSetTimedOvertime,
+        ServerSetPingTweenTime, ServerSetPawnCollisionHistoryLength;
+}
+
+function ServerSetAllowNewNetWeapons(bool bValue)
+{
+    if (PC.PlayerReplicationInfo.bAdmin)
+    {
+        bAllowNewNetWeapons = bValue;
+        class'MutUTComp'.default.bAllowNewNetWeapons = bValue;
+        class'MutUTComp'.static.StaticSaveConfig();
+    }
+}
+
+function ServerSetAllowNewEyeHeightAlgorithm(bool bValue)
+{
+    if (PC.PlayerReplicationInfo.bAdmin)
+    {
+        bAllowNewEyeHeightAlgorithm = bValue;
+        class'MutUTComp'.default.bAllowNewEyeHeightAlgorithm = bValue;
+        class'MutUTComp'.static.StaticSaveConfig();
+    }
+}
+
+function ServerSetDisableDoubleDamage(bool bValue)
+{
+    if (PC.PlayerReplicationInfo.bAdmin)
+    {
+        bDisableDoubleDamage = bValue;
+        UTComp.bDisableDoubleDamage = bValue;
+        UTComp.SaveConfig();
+    }
+}
+
+function ServerSetColoredDeathMessages(bool bValue)
+{
+    if (PC.PlayerReplicationInfo.bAdmin)
+    {
+        bColoredDeathMessages = bValue;
+        class'MutUTComp'.default.bColoredDeathMessages = bValue;
+        class'MutUTComp'.static.StaticSaveConfig();
+    }
+}
+
+function ServerSetNumGrenadesOnSpawn(int Value)
+{
+    if (PC.PlayerReplicationInfo.bAdmin)
+    {
+        NumGrenadesOnSpawn = Value;
+        UTComp.NumGrenadesOnSpawn = Value;
+        UTComp.SaveConfig();
+    }
+}
+
+function ServerSetStartingHealth(int Value)
+{
+    if (PC.PlayerReplicationInfo.bAdmin)
+    {
+        StartingHealth = Value;
+        UTComp.StartingHealth = Value;
+        UTComp.SaveConfig();
+    }
+}
+
+function ServerSetStartingArmor(int Value)
+{
+    if (PC.PlayerReplicationInfo.bAdmin)
+    {
+        StartingArmor = Value;
+        UTComp.StartingArmor = Value;
+        UTComp.SaveConfig();
+    }
+}
+
+function ServerSetTimedOvertime(int Value)
+{
+    if (PC.PlayerReplicationInfo.bAdmin)
+    {
+        TimedOvertime = Value;
+        UTComp.TimedOvertime = Value;
+        UTComp.SaveConfig();
+    }
+}
+
+function ServerSetPingTweenTime(float Value)
+{
+    if (PC.PlayerReplicationInfo.bAdmin)
+    {
+        PingTweenTime = Value;
+        UTComp.PingTweenTime = Value;
+        UTComp.SaveConfig();
+    }
+}
+
+function ServerSetPawnCollisionHistoryLength(float Value)
+{
+    if (PC.PlayerReplicationInfo.bAdmin)
+    {
+        PawnCollisionHistoryLength = Value;
+        class'MutUTComp'.default.PawnCollisionHistoryLength = Value;
+        class'MutUTComp'.static.StaticSaveConfig();
+    }
 }
 
 simulated function Ping()
@@ -64,9 +187,24 @@ simulated function Tick(float DeltaTime)
     }
 }
 
+static simulated function NewNet_PRI GetPRI(Controller C)
+{
+    local LinkedReplicationInfo LinkedPRI;
+
+    if (C.PlayerReplicationInfo != None)
+    {
+        LinkedPRI = C.PlayerReplicationInfo.CustomReplicationInfo;
+        while (LinkedPRI != None && NewNet_PRI(LinkedPRI) == None)
+        {
+            LinkedPRI = LinkedPRI.NextReplicationInfo;
+        }
+    }
+    return NewNet_PRI(LinkedPRI);
+}
+
 defaultproperties
 {
-    NetUpdateFrequency=200
+    NetUpdateFrequency=10
     NetPriority=5
     PingTweenTime=3.0
     bPingReceived=True

@@ -12,7 +12,6 @@ var config int NumGrenadesOnSpawn;
 var config int StartingHealth;
 var config int StartingArmor;
 var config int TimedOvertime;
-var config int NewNetUpdateFrequency;
 var config float PingTweenTime;
 var config float PawnCollisionHistoryLength;
 
@@ -148,10 +147,6 @@ function ModifyPlayer(Pawn Other)
         SpawnCollisionCopy(Other);
         RemoveOldPawns();
     }
-    if (bAllowNewEyeHeightAlgorithm)
-    {
-        SetupEyeHeightAlgorithm(UTComp_xPawn(Other));
-    }
     Super.ModifyPlayer(Other);
 }
 
@@ -171,14 +166,6 @@ function SpawnCollisionCopy(Pawn Other)
 function RemoveOldPawns()
 {
     PCC = PCC.RemoveOldPawns();
-}
-
-function SetupEyeHeightAlgorithm(UTComp_xPawn Other)
-{
-    if (Other != None)
-    {
-        Other.bAllowNewEyeHeightAlgorithm = bAllowNewEyeHeightAlgorithm;
-    }
 }
 
 function DriverEnteredVehicle(Vehicle V, Pawn P)
@@ -309,14 +296,24 @@ simulated function float GetStamp(int stamp)
 
 function SpawnNewNet_PRI(PlayerReplicationInfo PRI)
 {
-    local NewNet_PRI Tracker;
+    local NewNet_PRI NewNetPRI;
 
     if (PlayerController(PRI.Owner) != None && MessagingSpectator(PRI.Owner) == None)
     {
-        Tracker = NewNet_PRI(SpawnLinkedPRI(PRI, class'NewNet_PRI'));
-        Tracker.NetUpdateFrequency = NewNetUpdateFrequency;
-        Tracker.PingTweenTime = PingTweenTime;
-        Tracker.NetUpdateTime = Level.TimeSeconds - 1;
+        NewNetPRI = NewNet_PRI(SpawnLinkedPRI(PRI, class'NewNet_PRI'));
+        NewNetPRI.bAllowNewNetWeapons = bAllowNewNetWeapons;
+        NewNetPRI.bAllowNewEyeHeightAlgorithm = bAllowNewEyeHeightAlgorithm;
+        NewNetPRI.bDisableDoubleDamage = bDisableDoubleDamage;
+        NewNetPRI.bColoredDeathMessages = bColoredDeathMessages;
+        NewNetPRI.NumGrenadesOnSpawn = NumGrenadesOnSpawn;
+        NewNetPRI.StartingHealth = StartingHealth;
+        NewNetPRI.StartingArmor = StartingArmor;
+        NewNetPRI.TimedOvertime = TimedOvertime;
+        NewNetPRI.PingTweenTime = PingTweenTime;
+        NewNetPRI.PawnCollisionHistoryLength = PawnCollisionHistoryLength;
+        NewNetPRI.UTComp = self;
+        NewNetPRI.PC = PlayerController(PRI.Owner);
+        NewNetPRI.NetUpdateTime = Level.TimeSeconds - 1;
     }
 }
 
@@ -455,8 +452,6 @@ static function FillPlayInfo(PlayInfo PlayInfo)
     PlayInfo.AddSetting(
         Default.RulesGroup, "TimedOvertime", "Timed overtime duration", 0, 80, "Text","0;0:3600");
     PlayInfo.AddSetting(
-        Default.RulesGroup, "NewNetUpdateFrequency", "NewNet Update Frequency (200)", 0, 90, "Text","0;0:1000",, True, True);
-    PlayInfo.AddSetting(
         Default.RulesGroup, "PingTweenTime", "NewNet Ping Tween Time (3.0)", 0, 100, "Text","0;0.0:1000",, True, True);
     PlayInfo.AddSetting(
         Default.RulesGroup, "PawnCollisionHistoryLength", "NewNet Pawn Collision History Length (0.35)", 0, 110, "Text","0;0.0:1000",, True, True);
@@ -484,8 +479,6 @@ static event String GetDescriptionText(String PropName)
             return "Starting armor of players (0)";
         case "TimedOvertime":
             return "Duration of timed overtime (in seconds).";
-        case "NewNetUpdateFrequency":
-            return "NewNet Update Frequency (200)";
         case "PingTweenTime":
             return "NewNet Ping Tween Time (3.0)";
         case "PawnCollisionHistoryLength":
@@ -559,7 +552,6 @@ defaultproperties
     StartingHealth=100
     StartingArmor=0
     TimedOvertime=0
-    NewNetUpdateFrequency=200
     PingTweenTime=3.0
     PawnCollisionHistoryLength=0.35
     //original weapons
