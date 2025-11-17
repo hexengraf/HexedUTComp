@@ -538,7 +538,7 @@ simulated function Reset()
 
 defaultproperties
 {
-    FriendlyName="Hexed UTComp v0"
+    FriendlyName="Hexed UTComp v2dev"
     Description="A minimalist fork of UTComp compatible with HexedUT."
     bAlwaysRelevant=True
     RemoteRole=ROLE_SimulatedProxy
