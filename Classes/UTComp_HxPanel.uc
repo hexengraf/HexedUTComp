@@ -1,4 +1,4 @@
-class UTComp_HxGUIPanel extends HxGUIPanel;
+class UTComp_HxPanel extends HxPanel;
 
 const SECTION_GE = 0;
 const SECTION_NW = 2;
@@ -296,7 +296,7 @@ function bool IsSynchronized()
 
 static function AddToMenu()
 {
-    class'HxGUIMenu'.static.AddPanel(Default.Class, "UTComp", "UTComp Features");
+    class'HxMenu'.static.AddPanel(Default.Class, "UTComp", "UTComp Features");
 }
 
 defaultproperties

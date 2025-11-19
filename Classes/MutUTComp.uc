@@ -1,4 +1,4 @@
-class MutUTComp extends HxBaseMutator;
+class MutUTComp extends HxMutator;
 
 #exec AUDIO IMPORT FILE=Sounds\HitSound.wav
 
@@ -30,12 +30,14 @@ var class<Weapon> WeaponClasses[13];
 var class<Weapon> NewNetWeaponClasses[13];
 var bool bDefaultWeaponsChanged;
 
+var class<FloatingWindow> MenuClass;
+
 simulated function PreBeginPlay()
 {
     Super.PreBeginPlay();
     ServerPreBeginPlay();
-    class'UTComp_HxGUIPanel'.static.AddToMenu();
-    class'HxHitEffects'.static.AddHitSound(Sound'HitSound');
+    class'UTComp_HxPanel'.static.AddToMenu();
+    class'HxSounds'.static.AddHitSound(Sound'HitSound');
 }
 
 function ServerPreBeginPlay()
@@ -432,6 +434,18 @@ function GetServerDetails(out GameInfo.ServerResponseLine ServerState)
     }
 }
 
+simulated function Mutate(string Command, PlayerController Sender)
+{
+    if (Command ~= "HexedUT")
+    {
+        Sender.ClientOpenMenu(string(MenuClass));
+    }
+	else if (NextMutator != None)
+    {
+		NextMutator.Mutate(Command, Sender);
+    }
+}
+
 static function FillPlayInfo(PlayInfo PlayInfo)
 {
     PlayInfo.AddClass(Default.Class);
@@ -582,4 +596,5 @@ defaultproperties
     NewNetWeaponClasses(10)=class'NewNet_ONSMineLayer'
     NewNetWeaponClasses(11)=class'NewNet_ONSGrenadeLauncher'
     NewNetWeaponClasses(12)=class'NewNet_SuperShockRifle'
+    MenuClass=class'HxMenu'
 }
