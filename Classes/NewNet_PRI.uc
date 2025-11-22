@@ -22,9 +22,6 @@ var bool bAllowNewNetWeapons;
 var bool bAllowNewEyeHeightAlgorithm;
 var bool bDisableDoubleDamage;
 var bool bColoredDeathMessages;
-var int NumGrenadesOnSpawn;
-var int StartingHealth;
-var int StartingArmor;
 var int TimedOvertime;
 var float PingTweenTime;
 var float PawnCollisionHistoryLength;
@@ -46,13 +43,11 @@ replication
 
     reliable if (Role == ROLE_Authority)
         bAllowNewNetWeapons, bAllowNewEyeHeightAlgorithm, bDisableDoubleDamage,
-        bColoredDeathMessages, NumGrenadesOnSpawn, StartingHealth, StartingArmor,
-        TimedOvertime, PingTweenTime, PawnCollisionHistoryLength;
+        bColoredDeathMessages, TimedOvertime, PingTweenTime, PawnCollisionHistoryLength;
 
     reliable if (Role < ROLE_Authority)
         ServerSetAllowNewNetWeapons, ServerSetAllowNewEyeHeightAlgorithm,
-        ServerSetDisableDoubleDamage, ServerSetColoredDeathMessages, ServerSetNumGrenadesOnSpawn,
-        ServerSetStartingHealth, ServerSetStartingArmor, ServerSetTimedOvertime,
+        ServerSetDisableDoubleDamage, ServerSetColoredDeathMessages, ServerSetTimedOvertime,
         ServerSetPingTweenTime, ServerSetPawnCollisionHistoryLength;
 }
 
@@ -93,36 +88,6 @@ function ServerSetColoredDeathMessages(bool bValue)
         bColoredDeathMessages = bValue;
         class'MutUTComp'.default.bColoredDeathMessages = bValue;
         class'MutUTComp'.static.StaticSaveConfig();
-    }
-}
-
-function ServerSetNumGrenadesOnSpawn(int Value)
-{
-    if (PC.PlayerReplicationInfo.bAdmin)
-    {
-        NumGrenadesOnSpawn = Value;
-        UTComp.NumGrenadesOnSpawn = Value;
-        UTComp.SaveConfig();
-    }
-}
-
-function ServerSetStartingHealth(int Value)
-{
-    if (PC.PlayerReplicationInfo.bAdmin)
-    {
-        StartingHealth = Value;
-        UTComp.StartingHealth = Value;
-        UTComp.SaveConfig();
-    }
-}
-
-function ServerSetStartingArmor(int Value)
-{
-    if (PC.PlayerReplicationInfo.bAdmin)
-    {
-        StartingArmor = Value;
-        UTComp.StartingArmor = Value;
-        UTComp.SaveConfig();
     }
 }
 

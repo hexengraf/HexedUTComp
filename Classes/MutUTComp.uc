@@ -8,9 +8,6 @@ var config bool bAllowNewNetWeapons;
 var config bool bAllowNewEyeHeightAlgorithm;
 var config bool bDisableDoubleDamage;
 var config bool bColoredDeathMessages;
-var config int NumGrenadesOnSpawn;
-var config int StartingHealth;
-var config int StartingArmor;
 var config int TimedOvertime;
 var config float PingTweenTime;
 var config float PawnCollisionHistoryLength;
@@ -133,17 +130,10 @@ event PostBeginPlay()
     G = Spawn(class'UTComp_GameRules');
     G.UTComp = Self;
     Level.Game.AddGameModifier(G);
-    class'GrenadeAmmo'.Default.InitialAmount = NumGrenadesOnSpawn;
 }
 
 function ModifyPlayer(Pawn Other)
 {
-    if(xPawn(Other) != None)
-    {
-        Other.Health = StartingHealth;
-        Other.ShieldStrength = 0;
-        Other.AddShieldStrength(StartingArmor);
-    }
     if (bAllowNewNetWeapons)
     {
         SpawnCollisionCopy(Other);
@@ -307,9 +297,6 @@ function SpawnNewNet_PRI(PlayerReplicationInfo PRI)
         NewNetPRI.bAllowNewEyeHeightAlgorithm = bAllowNewEyeHeightAlgorithm;
         NewNetPRI.bDisableDoubleDamage = bDisableDoubleDamage;
         NewNetPRI.bColoredDeathMessages = bColoredDeathMessages;
-        NewNetPRI.NumGrenadesOnSpawn = NumGrenadesOnSpawn;
-        NewNetPRI.StartingHealth = StartingHealth;
-        NewNetPRI.StartingArmor = StartingArmor;
         NewNetPRI.TimedOvertime = TimedOvertime;
         NewNetPRI.PingTweenTime = PingTweenTime;
         NewNetPRI.PawnCollisionHistoryLength = PawnCollisionHistoryLength;
@@ -458,12 +445,6 @@ static function FillPlayInfo(PlayInfo PlayInfo)
     PlayInfo.AddSetting(
         Default.RulesGroup, "bColoredDeathMessages", "Enable colored names in death messages", 0, 40, "Check");
     PlayInfo.AddSetting(
-        Default.RulesGroup, "NumGrenadesOnSpawn", "Number of grenades on spawn", 255, 50, "Text","2;0:32");
-    PlayInfo.AddSetting(
-        Default.RulesGroup, "StartingHealth", "Starting health of players", 0, 60, "Text", "0;0:199");
-    PlayInfo.AddSetting(
-        Default.RulesGroup, "StartingArmor", "Starting armor of players", 0, 70, "Text", "0;0:150");
-    PlayInfo.AddSetting(
         Default.RulesGroup, "TimedOvertime", "Timed overtime duration", 0, 80, "Text","0;0:3600");
     PlayInfo.AddSetting(
         Default.RulesGroup, "PingTweenTime", "NewNet Ping Tween Time (3.0)", 0, 100, "Text","0;0.0:1000",, True, True);
@@ -485,12 +466,6 @@ static event String GetDescriptionText(String PropName)
             return "Disable double damage pickups on maps.";
         case "bColoredDeathMessages":
             return "Use team colors for the player names in the death messages.";
-        case "NumGrenadesOnSpawn":
-            return "Number of Assault Rifle grenades each player spawns with.";
-        case "StartingHealth":
-            return "Starting health of players (100)";
-        case "StartingArmor":
-            return "Starting armor of players (0)";
         case "TimedOvertime":
             return "Duration of timed overtime (in seconds).";
         case "PingTweenTime":
@@ -562,9 +537,6 @@ defaultproperties
     bColoredDeathMessages=True
     bAllowNewNetWeapons=True
     bAllowNewEyeHeightAlgorithm=True
-    NumGrenadesOnSpawn=4
-    StartingHealth=100
-    StartingArmor=0
     TimedOvertime=0
     PingTweenTime=3.0
     PawnCollisionHistoryLength=0.35

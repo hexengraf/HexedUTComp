@@ -6,9 +6,6 @@ const SECTION_EA = 3;
 
 var automated moCheckBox ch_bDisableDoubleDamage;
 var automated moCheckBox ch_bColoredDeathMessages;
-var automated moNumericEdit nu_NumGrenadesOnSpawn;
-var automated moNumericEdit nu_StartingHealth;
-var automated moNumericEdit nu_StartingArmor;
 var automated moNumericEdit nu_TimedOvertime;
 
 var automated moCheckBox ch_bAllowNewNetWeapons;
@@ -30,9 +27,6 @@ function InitComponent(GUIController MyController, GUIComponent MyOwner)
 
     Sections[SECTION_GE].ManageComponent(ch_bDisableDoubleDamage);
     Sections[SECTION_GE].ManageComponent(ch_bColoredDeathMessages);
-    Sections[SECTION_GE].ManageComponent(nu_NumGrenadesOnSpawn);
-    Sections[SECTION_GE].ManageComponent(nu_StartingHealth);
-    Sections[SECTION_GE].ManageComponent(nu_StartingArmor);
     Sections[SECTION_GE].ManageComponent(nu_TimedOvertime);
 
     Sections[SECTION_NW].ManageComponent(ch_bAllowNewNetWeapons);
@@ -82,9 +76,6 @@ function UpdateAll()
     {
         EnableComponent(ch_bDisableDoubleDamage);
         EnableComponent(ch_bColoredDeathMessages);
-        EnableComponent(nu_NumGrenadesOnSpawn);
-        EnableComponent(nu_StartingHealth);
-        EnableComponent(nu_StartingArmor);
         EnableComponent(nu_TimedOvertime);
         EnableComponent(ch_bAllowNewNetWeapons);
         if (PRI.bAllowNewNetWeapons)
@@ -103,9 +94,6 @@ function UpdateAll()
     {
         DisableComponent(ch_bDisableDoubleDamage);
         DisableComponent(ch_bColoredDeathMessages);
-        DisableComponent(nu_NumGrenadesOnSpawn);
-        DisableComponent(nu_StartingHealth);
-        DisableComponent(nu_StartingArmor);
         DisableComponent(nu_TimedOvertime);
         DisableComponent(ch_bAllowNewNetWeapons);
         DisableComponent(nu_PingTweenTime);
@@ -165,27 +153,6 @@ function InternalOnChange(GUIComponent C)
             if (IsAdmin())
             {
                 PRI.ServerSetColoredDeathMessages(ch_bColoredDeathMessages.IsChecked());
-                SetTimer(0.1, true);
-            }
-            break;
-        case nu_NumGrenadesOnSpawn:
-            if (IsAdmin())
-            {
-                PRI.ServerSetNumGrenadesOnSpawn(nu_NumGrenadesOnSpawn.GetValue());
-                SetTimer(0.1, true);
-            }
-            break;
-        case nu_StartingHealth:
-            if (IsAdmin())
-            {
-                PRI.ServerSetStartingHealth(nu_StartingHealth.GetValue());
-                SetTimer(0.1, true);
-            }
-            break;
-        case nu_StartingArmor:
-            if (IsAdmin())
-            {
-                PRI.ServerSetStartingArmor(nu_StartingArmor.GetValue());
                 SetTimer(0.1, true);
             }
             break;
@@ -264,9 +231,6 @@ function bool Initialize()
     {
         ch_bDisableDoubleDamage.Checked(PRI.bDisableDoubleDamage);
         ch_bColoredDeathMessages.Checked(PRI.bColoredDeathMessages);
-        nu_NumGrenadesOnSpawn.SetComponentValue(PRI.NumGrenadesOnSpawn);
-        nu_StartingHealth.SetComponentValue(PRI.StartingHealth);
-        nu_StartingArmor.SetComponentValue(PRI.StartingArmor);
         nu_TimedOvertime.SetComponentValue(PRI.TimedOvertime);
         ch_bAllowNewNetWeapons.Checked(PRI.bAllowNewNetWeapons);
         nu_PingTweenTime.SetComponentValue(PRI.PingTweenTime);
@@ -284,9 +248,6 @@ function bool IsSynchronized()
 {
     return PRI.bDisableDoubleDamage == ch_bDisableDoubleDamage.IsChecked()
         && PRI.bColoredDeathMessages == ch_bColoredDeathMessages.IsChecked()
-        && PRI.NumGrenadesOnSpawn == nu_NumGrenadesOnSpawn.GetValue()
-        && PRI.StartingHealth == nu_StartingHealth.GetValue()
-        && PRI.StartingArmor == nu_StartingArmor.GetValue()
         && PRI.TimedOvertime == nu_TimedOvertime.GetValue()
         && PRI.bAllowNewNetWeapons == ch_bAllowNewNetWeapons.IsChecked()
         && PRI.PingTweenTime == nu_PingTweenTime.GetValue()
@@ -306,7 +267,6 @@ defaultproperties
     Begin Object class=AltSectionBackground Name=General
         Caption="General"
         WinHeight=0.32
-        NumColumns=2
     End Object
     Sections(0)=General
     Sections(1)=None
@@ -340,51 +300,6 @@ defaultproperties
         OnChange=InternalOnChange
     End Object
     ch_bColoredDeathMessages=ColoredDeathMessages
-
-    Begin Object class=moNumericEdit Name=NumGrenadesOnSpawn
-        Caption="Grenades on spawn"
-        MinValue=0
-        MaxValue=10
-        LabelJustification=TXTA_Left
-        ComponentJustification=TXTA_Right
-        ComponentWidth=0.25
-        bAutoSizeCaption=true
-        bBoundToParent=true
-        bScaleToParent=true
-        TabOrder=2
-        OnChange=InternalOnChange
-    End Object
-    nu_NumGrenadesOnSpawn=NumGrenadesOnSpawn
-
-    Begin Object class=moNumericEdit Name=StartingHealth
-        Caption="Starting health"
-        MinValue=1
-        MaxValue=199
-        LabelJustification=TXTA_Left
-        ComponentJustification=TXTA_Right
-        ComponentWidth=0.25
-        bAutoSizeCaption=true
-        bBoundToParent=true
-        bScaleToParent=true
-        TabOrder=3
-        OnChange=InternalOnChange
-    End Object
-    nu_StartingHealth=StartingHealth
-
-    Begin Object class=moNumericEdit Name=StartingArmor
-        Caption="Starting armor"
-        MinValue=0
-        MaxValue=150
-        LabelJustification=TXTA_Left
-        ComponentJustification=TXTA_Right
-        ComponentWidth=0.25
-        bAutoSizeCaption=true
-        bBoundToParent=true
-        bScaleToParent=true
-        TabOrder=4
-        OnChange=InternalOnChange
-    End Object
-    nu_StartingArmor=StartingArmor
 
     Begin Object class=moNumericEdit Name=TimedOvertime
         Caption="Timed overtime"
