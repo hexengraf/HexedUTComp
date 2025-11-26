@@ -27,14 +27,15 @@ var class<Weapon> WeaponClasses[13];
 var class<Weapon> NewNetWeaponClasses[13];
 var bool bDefaultWeaponsChanged;
 
-var class<FloatingWindow> MenuClass;
-
 simulated function PreBeginPlay()
 {
     Super.PreBeginPlay();
     ServerPreBeginPlay();
-    class'UTComp_HxPanel'.static.AddToMenu();
-    class'HxSounds'.static.AddHitSound(Sound'HitSound');
+    if (Level.NetMode != NM_DedicatedServer)
+    {
+        class'UTComp_HxMenuPanel'.static.AddToMenu();
+        class'HxSounds'.static.AddHitSound(Sound'HitSound');
+    }
 }
 
 function ServerPreBeginPlay()
@@ -293,16 +294,9 @@ function SpawnNewNet_PRI(PlayerReplicationInfo PRI)
     if (PlayerController(PRI.Owner) != None && MessagingSpectator(PRI.Owner) == None)
     {
         NewNetPRI = NewNet_PRI(SpawnLinkedPRI(PRI, class'NewNet_PRI'));
-        NewNetPRI.bAllowNewNetWeapons = bAllowNewNetWeapons;
-        NewNetPRI.bAllowNewEyeHeightAlgorithm = bAllowNewEyeHeightAlgorithm;
-        NewNetPRI.bDisableDoubleDamage = bDisableDoubleDamage;
-        NewNetPRI.bColoredDeathMessages = bColoredDeathMessages;
-        NewNetPRI.TimedOvertime = TimedOvertime;
-        NewNetPRI.PingTweenTime = PingTweenTime;
-        NewNetPRI.PawnCollisionHistoryLength = PawnCollisionHistoryLength;
         NewNetPRI.UTComp = self;
         NewNetPRI.PC = PlayerController(PRI.Owner);
-        NewNetPRI.NetUpdateTime = Level.TimeSeconds - 1;
+        UpdatePRI(NewNetPRI);
     }
 }
 
@@ -363,12 +357,6 @@ function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
     return True;
 }
 
-function ServerTraveling(String URL, bool bItems)
-{
-    class'GrenadeAmmo'.Default.InitialAmount = 4;
-    Super.ServerTraveling(URL, bItems);
-}
-
 function String GetInventoryClassOverride(String InventoryClassName)
 {
     local String OverrideClassName;
@@ -421,61 +409,6 @@ function GetServerDetails(out GameInfo.ServerResponseLine ServerState)
     }
 }
 
-simulated function Mutate(string Command, PlayerController Sender)
-{
-    if (Command ~= "HexedUT")
-    {
-        Sender.ClientOpenMenu(string(MenuClass));
-    }
-	else if (NextMutator != None)
-    {
-		NextMutator.Mutate(Command, Sender);
-    }
-}
-
-static function FillPlayInfo(PlayInfo PlayInfo)
-{
-    PlayInfo.AddClass(Default.Class);
-    PlayInfo.AddSetting(
-        Default.RulesGroup, "bAllowNewNetWeapons", "Allow NewNet Weapons", 0, 10, "Check",,, True, True);
-    PlayInfo.AddSetting(
-        Default.RulesGroup, "bAllowNewEyeHeightAlgorithm", "Allow new EyeHeight algorithm", 0, 20, "Check");
-    PlayInfo.AddSetting(
-        Default.RulesGroup, "bDisableDoubleDamage", "Disable double damage", 0, 30, "Check");
-    PlayInfo.AddSetting(
-        Default.RulesGroup, "bColoredDeathMessages", "Enable colored names in death messages", 0, 40, "Check");
-    PlayInfo.AddSetting(
-        Default.RulesGroup, "TimedOvertime", "Timed overtime duration", 0, 80, "Text","0;0:3600");
-    PlayInfo.AddSetting(
-        Default.RulesGroup, "PingTweenTime", "NewNet Ping Tween Time (3.0)", 0, 100, "Text","0;0.0:1000",, True, True);
-    PlayInfo.AddSetting(
-        Default.RulesGroup, "PawnCollisionHistoryLength", "NewNet Pawn Collision History Length (0.35)", 0, 110, "Text","0;0.0:1000",, True, True);
-    PlayInfo.PopClass();
-    super.FillPlayInfo(PlayInfo);
-}
-
-static event String GetDescriptionText(String PropName)
-{
-    switch (PropName)
-    {
-        case "bAllowNewNetWeapons":
-            return "Allow clients to enable/disable the NewNet Weapons";
-        case "bAllowNewEyeHeightAlgorithm":
-            return "Allow clients to enable/disable the new EyeHeight algorithm";
-        case "bDisableDoubleDamage":
-            return "Disable double damage pickups on maps.";
-        case "bColoredDeathMessages":
-            return "Use team colors for the player names in the death messages.";
-        case "TimedOvertime":
-            return "Duration of timed overtime (in seconds).";
-        case "PingTweenTime":
-            return "NewNet Ping Tween Time (3.0)";
-        case "PawnCollisionHistoryLength":
-            return "NewNet Pawn Collision History Length (0.35)";
-    }
-    return Super.GetDescriptionText(PropName);
-}
-
 /*
  fix for netcode not working in second round in assault and ons game modes
  reset is called bewteen rounds, clean up timestamp pawn and controller and recreate
@@ -525,6 +458,33 @@ simulated function Reset()
     }
 }
 
+function UpdatePRI(NewNet_PRI PRI)
+{
+    PRI.bAllowNewNetWeapons = bAllowNewNetWeapons;
+    PRI.bAllowNewEyeHeightAlgorithm = bAllowNewEyeHeightAlgorithm;
+    PRI.bDisableDoubleDamage = bDisableDoubleDamage;
+    PRI.bColoredDeathMessages = bColoredDeathMessages;
+    PRI.TimedOvertime = TimedOvertime;
+    PRI.PingTweenTime = PingTweenTime;
+    PRI.PawnCollisionHistoryLength = PawnCollisionHistoryLength;
+    PRI.NetUpdateTime = Level.TimeSeconds - 1;
+}
+
+function UpdateAllClients()
+{
+    local NewNet_PRI PRI;
+    local Controller C;
+
+    for (C = Level.ControllerList; C != None; C = C.NextController)
+    {
+        PRI = class'NewNet_PRI'.static.GetPRI(C);
+        if (PRI != None)
+        {
+            UpdatePRI(PRI);
+        }
+    }
+}
+
 defaultproperties
 {
     FriendlyName="Hexed UTComp v2dev"
@@ -532,6 +492,16 @@ defaultproperties
     bAlwaysRelevant=True
     RemoteRole=ROLE_SimulatedProxy
     bAddToServerPackages=True
+    MutatorGroup="HexedUTComp"
+
+    PropertyInfoEntries(0)=(Name="bAllowNewNetWeapons",Caption="Allow NewNet Weapons",Hint="Allow clients to enable/disable the NewNet Weapons.",PIType="Check",bMultiplayerOnly=true,bAdvanced=true)
+    PropertyInfoEntries(1)=(Name="bAllowNewEyeHeightAlgorithm",Caption="Allow new EyeHeight algorithm",Hint="Allow clients to enable/disable the new EyeHeight algorithm.",PIType="Check")
+    PropertyInfoEntries(2)=(Name="bDisableDoubleDamage",Caption="Disable double damage",Hint="Disable double damage pickups on maps.",PIType="Check")
+    PropertyInfoEntries(3)=(Name="bColoredDeathMessages",Caption="Enable colored names in death messages",Hint="Use team colors for the player names in the death messages.",PIType="Check")
+    PropertyInfoEntries(4)=(Name="TimedOvertime",Caption="Timed overtime duration",PIType="Text",Hint="Duration of timed overtime (in seconds).",PIExtras="0;0:3600")
+    PropertyInfoEntries(5)=(Name="PingTweenTime",Caption="NewNet Ping Tween Time (3.0)",Hint="NewNet Ping Tween Time (3.0).",PIType="Text",PIExtras="0;0.0:1000",bMultiplayerOnly=true,bAdvanced=true)
+    PropertyInfoEntries(6)=(Name="PawnCollisionHistoryLength",Caption="NewNet Pawn Collision History Length (0.35)",Hint="NewNet Pawn Collision History Length (0.35).",PIType="Text",PIExtras="0;0.0:1000",bMultiplayerOnly=true,bAdvanced=true)
+
     // configs
     bDisableDoubleDamage=False
     bColoredDeathMessages=True
@@ -568,5 +538,4 @@ defaultproperties
     NewNetWeaponClasses(10)=class'NewNet_ONSMineLayer'
     NewNetWeaponClasses(11)=class'NewNet_ONSGrenadeLauncher'
     NewNetWeaponClasses(12)=class'NewNet_SuperShockRifle'
-    MenuClass=class'HxMenu'
 }

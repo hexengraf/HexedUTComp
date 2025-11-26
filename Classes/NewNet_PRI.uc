@@ -46,78 +46,14 @@ replication
         bColoredDeathMessages, TimedOvertime, PingTweenTime, PawnCollisionHistoryLength;
 
     reliable if (Role < ROLE_Authority)
-        ServerSetAllowNewNetWeapons, ServerSetAllowNewEyeHeightAlgorithm,
-        ServerSetDisableDoubleDamage, ServerSetColoredDeathMessages, ServerSetTimedOvertime,
-        ServerSetPingTweenTime, ServerSetPawnCollisionHistoryLength;
+        RemoteSetProperty;
 }
 
-function ServerSetAllowNewNetWeapons(bool bValue)
+function RemoteSetProperty(string PropertyName, string PropertyValue)
 {
     if (PC.PlayerReplicationInfo.bAdmin)
     {
-        bAllowNewNetWeapons = bValue;
-        class'MutUTComp'.default.bAllowNewNetWeapons = bValue;
-        class'MutUTComp'.static.StaticSaveConfig();
-    }
-}
-
-function ServerSetAllowNewEyeHeightAlgorithm(bool bValue)
-{
-    if (PC.PlayerReplicationInfo.bAdmin)
-    {
-        bAllowNewEyeHeightAlgorithm = bValue;
-        class'MutUTComp'.default.bAllowNewEyeHeightAlgorithm = bValue;
-        class'MutUTComp'.static.StaticSaveConfig();
-    }
-}
-
-function ServerSetDisableDoubleDamage(bool bValue)
-{
-    if (PC.PlayerReplicationInfo.bAdmin)
-    {
-        bDisableDoubleDamage = bValue;
-        UTComp.bDisableDoubleDamage = bValue;
-        UTComp.SaveConfig();
-    }
-}
-
-function ServerSetColoredDeathMessages(bool bValue)
-{
-    if (PC.PlayerReplicationInfo.bAdmin)
-    {
-        bColoredDeathMessages = bValue;
-        class'MutUTComp'.default.bColoredDeathMessages = bValue;
-        class'MutUTComp'.static.StaticSaveConfig();
-    }
-}
-
-function ServerSetTimedOvertime(int Value)
-{
-    if (PC.PlayerReplicationInfo.bAdmin)
-    {
-        TimedOvertime = Value;
-        UTComp.TimedOvertime = Value;
-        UTComp.SaveConfig();
-    }
-}
-
-function ServerSetPingTweenTime(float Value)
-{
-    if (PC.PlayerReplicationInfo.bAdmin)
-    {
-        PingTweenTime = Value;
-        UTComp.PingTweenTime = Value;
-        UTComp.SaveConfig();
-    }
-}
-
-function ServerSetPawnCollisionHistoryLength(float Value)
-{
-    if (PC.PlayerReplicationInfo.bAdmin)
-    {
-        PawnCollisionHistoryLength = Value;
-        class'MutUTComp'.default.PawnCollisionHistoryLength = Value;
-        class'MutUTComp'.static.StaticSaveConfig();
+        UTComp.SetProperty(PropertyName, PropertyValue);
     }
 }
 
