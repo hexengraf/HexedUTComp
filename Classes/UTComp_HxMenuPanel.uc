@@ -121,23 +121,27 @@ function UserOnChange(GUIComponent C)
     class'UTComp_xPawn'.static.StaticSaveConfig();
 }
 
-static function AddToMenu()
+static function bool AddToMenu()
 {
     local int i;
     local int Order;
 
-    for (i = 0; i < default.ServerOptions.Length; ++i)
+    if (Super.AddToMenu())
     {
-        default.ServerOptions[i].TabOrder = Order++;
-        default.ServerOptions[i].Caption = class'MutUTComp'.default.PropertyInfoEntries[i].Caption;
-        default.ServerOptions[i].Hint = class'MutUTComp'.default.PropertyInfoEntries[i].Hint;
-        default.ServerOptions[i].PropertyName = class'MutUTComp'.default.PropertyInfoEntries[i].Name;
+        for (i = 0; i < default.ServerOptions.Length; ++i)
+        {
+            default.ServerOptions[i].TabOrder = Order++;
+            default.ServerOptions[i].Caption = class'MutUTComp'.default.PropertyInfoEntries[i].Caption;
+            default.ServerOptions[i].Hint = class'MutUTComp'.default.PropertyInfoEntries[i].Hint;
+            default.ServerOptions[i].PropertyName = class'MutUTComp'.default.PropertyInfoEntries[i].Name;
+        }
+        for (i = 0; i < default.UserOptions.Length; ++i)
+        {
+            default.UserOptions[i].TabOrder = Order++;
+        }
+        return true;
     }
-    for (i = 0; i < default.UserOptions.Length; ++i)
-    {
-        default.UserOptions[i].TabOrder = Order++;
-    }
-    class'HxMenu'.static.AddPanel(default.Class, "UTComp", "UTComp Features");
+    return false;
 }
 
 defaultproperties
@@ -208,6 +212,8 @@ defaultproperties
         OnChange=UserOnChange
     End Object
 
+    PanelCaption="UTComp"
+    PanelHint="UTComp Features"
     bDoubleColumn=false
     Sections(0)=ServerSection
     Sections(1)=UserSection
