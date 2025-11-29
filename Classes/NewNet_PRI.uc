@@ -20,7 +20,6 @@ class NewNet_PRI extends LinkedReplicationInfo;
 
 var bool bAllowNewNetWeapons;
 var bool bAllowNewEyeHeightAlgorithm;
-var bool bDisableDoubleDamage;
 var bool bColoredDeathMessages;
 var int TimedOvertime;
 var float PingTweenTime;
@@ -42,8 +41,8 @@ replication
         Pong;
 
     reliable if (Role == ROLE_Authority)
-        bAllowNewNetWeapons, bAllowNewEyeHeightAlgorithm, bDisableDoubleDamage,
-        bColoredDeathMessages, TimedOvertime, PingTweenTime, PawnCollisionHistoryLength;
+        bAllowNewNetWeapons, bAllowNewEyeHeightAlgorithm, bColoredDeathMessages, TimedOvertime,
+        PingTweenTime, PawnCollisionHistoryLength;
 
     reliable if (Role < ROLE_Authority)
         RemoteSetProperty;

@@ -6,7 +6,6 @@ const AVERDT_SEND_PERIOD = 4.00;
 
 var config bool bAllowNewNetWeapons;
 var config bool bAllowNewEyeHeightAlgorithm;
-var config bool bDisableDoubleDamage;
 var config bool bColoredDeathMessages;
 var config int TimedOvertime;
 var config float PingTweenTime;
@@ -349,11 +348,6 @@ function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
             return True;
         }
     }
-    if (bDisableDoubleDamage && Other.IsA('UDamagePack'))
-    {
-        bSuperRelevant = 0;
-        return False;
-    }
     return True;
 }
 
@@ -462,7 +456,6 @@ function UpdatePRI(NewNet_PRI PRI)
 {
     PRI.bAllowNewNetWeapons = bAllowNewNetWeapons;
     PRI.bAllowNewEyeHeightAlgorithm = bAllowNewEyeHeightAlgorithm;
-    PRI.bDisableDoubleDamage = bDisableDoubleDamage;
     PRI.bColoredDeathMessages = bColoredDeathMessages;
     PRI.TimedOvertime = TimedOvertime;
     PRI.PingTweenTime = PingTweenTime;
@@ -496,14 +489,12 @@ defaultproperties
 
     PropertyInfoEntries(0)=(Name="bAllowNewNetWeapons",Caption="Allow NewNet Weapons",Hint="Allow clients to enable/disable the NewNet Weapons.",PIType="Check",bMultiplayerOnly=true,bAdvanced=true)
     PropertyInfoEntries(1)=(Name="bAllowNewEyeHeightAlgorithm",Caption="Allow new EyeHeight algorithm",Hint="Allow clients to enable/disable the new EyeHeight algorithm.",PIType="Check")
-    PropertyInfoEntries(2)=(Name="bDisableDoubleDamage",Caption="Disable double damage",Hint="Disable double damage pickups on maps.",PIType="Check")
-    PropertyInfoEntries(3)=(Name="bColoredDeathMessages",Caption="Enable colored names in death messages",Hint="Use team colors for the player names in the death messages.",PIType="Check")
-    PropertyInfoEntries(4)=(Name="TimedOvertime",Caption="Timed overtime duration",PIType="Text",Hint="Duration of timed overtime (in seconds).",PIExtras="0;0:3600")
-    PropertyInfoEntries(5)=(Name="PingTweenTime",Caption="NewNet Ping Tween Time (3.0)",Hint="NewNet Ping Tween Time (3.0).",PIType="Text",PIExtras="0;0.0:1000",bMultiplayerOnly=true,bAdvanced=true)
-    PropertyInfoEntries(6)=(Name="PawnCollisionHistoryLength",Caption="NewNet Pawn Collision History Length (0.35)",Hint="NewNet Pawn Collision History Length (0.35).",PIType="Text",PIExtras="0;0.0:1000",bMultiplayerOnly=true,bAdvanced=true)
+    PropertyInfoEntries(2)=(Name="bColoredDeathMessages",Caption="Enable colored names in death messages",Hint="Use team colors for the player names in the death messages.",PIType="Check")
+    PropertyInfoEntries(3)=(Name="TimedOvertime",Caption="Timed overtime duration",PIType="Text",Hint="Duration of timed overtime (in seconds).",PIExtras="0;0:3600")
+    PropertyInfoEntries(4)=(Name="PingTweenTime",Caption="NewNet Ping Tween Time (3.0)",Hint="NewNet Ping Tween Time (3.0).",PIType="Text",PIExtras="0;0.0:1000",bMultiplayerOnly=true,bAdvanced=true)
+    PropertyInfoEntries(5)=(Name="PawnCollisionHistoryLength",Caption="NewNet Pawn Collision History Length (0.35)",Hint="NewNet Pawn Collision History Length (0.35).",PIType="Text",PIExtras="0;0.0:1000",bMultiplayerOnly=true,bAdvanced=true)
 
     // configs
-    bDisableDoubleDamage=False
     bColoredDeathMessages=True
     bAllowNewNetWeapons=True
     bAllowNewEyeHeightAlgorithm=True

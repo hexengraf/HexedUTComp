@@ -148,7 +148,7 @@ defaultproperties
 {
     Begin Object class=AltSectionBackground Name=ServerSection
         Caption="Server Options"
-        WinHeight=0.56
+        WinHeight=0.40
     End Object
 
     Begin Object class=AltSectionBackground Name=UserSection
@@ -161,10 +161,6 @@ defaultproperties
     End Object
 
     Begin Object Class=HxMenuCheckBox Name=AllowNewEyeHeightAlgorithm
-        OnChange=RemoteOnChange
-    End Object
-
-    Begin Object Class=HxMenuCheckBox Name=DisableDoubleDamage
         OnChange=RemoteOnChange
     End Object
 
@@ -219,11 +215,10 @@ defaultproperties
     Sections(1)=UserSection
     ServerOptions(0)=AllowNewNetWeapons
     ServerOptions(1)=AllowNewEyeHeightAlgorithm
-    ServerOptions(2)=DisableDoubleDamage
-    ServerOptions(3)=ColoredDeathMessages
-    ServerOptions(4)=TimedOvertime
-    ServerOptions(5)=PingTweenTime
-    ServerOptions(6)=PawnCollisionHistoryLength
+    ServerOptions(2)=ColoredDeathMessages
+    ServerOptions(3)=TimedOvertime
+    ServerOptions(4)=PingTweenTime
+    ServerOptions(5)=PawnCollisionHistoryLength
     UserOptions(0)=EnhancedNetCode
     UserOptions(1)=NewEyeHeightAlgorithm
     UserOptions(2)=ViewSmoothing
