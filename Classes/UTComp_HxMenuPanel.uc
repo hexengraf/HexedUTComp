@@ -164,10 +164,6 @@ defaultproperties
         OnChange=RemoteOnChange
     End Object
 
-    Begin Object Class=HxMenuCheckBox Name=ColoredDeathMessages
-        OnChange=RemoteOnChange
-    End Object
-
     Begin Object class=HxMenuNumericEdit Name=TimedOvertime
         MinValue=0
         MaxValue=3600
@@ -215,10 +211,9 @@ defaultproperties
     Sections(1)=UserSection
     ServerOptions(0)=AllowNewNetWeapons
     ServerOptions(1)=AllowNewEyeHeightAlgorithm
-    ServerOptions(2)=ColoredDeathMessages
-    ServerOptions(3)=TimedOvertime
-    ServerOptions(4)=PingTweenTime
-    ServerOptions(5)=PawnCollisionHistoryLength
+    ServerOptions(2)=TimedOvertime
+    ServerOptions(3)=PingTweenTime
+    ServerOptions(4)=PawnCollisionHistoryLength
     UserOptions(0)=EnhancedNetCode
     UserOptions(1)=NewEyeHeightAlgorithm
     UserOptions(2)=ViewSmoothing
