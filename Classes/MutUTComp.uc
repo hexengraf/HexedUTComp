@@ -445,7 +445,7 @@ function UpdatePRI(NewNet_PRI PRI)
     PRI.NetUpdateTime = Level.TimeSeconds - 1;
 }
 
-function UpdateAllClients()
+function UpdateAfterPropertyChange(string PropertyName, String PropertyValue)
 {
     local NewNet_PRI PRI;
     local Controller C;
