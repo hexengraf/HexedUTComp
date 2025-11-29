@@ -56,7 +56,7 @@ function NewNetWeaponsAfterChange(coerce bool bEnable)
 {
     local int i;
 
-    for (i = 5; i < 7; ++i)
+    for (i = 3; i < ServerOptions.Length; ++i)
     {
         ServerOptions[i].SetEnable(bEnable);
     }
