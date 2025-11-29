@@ -47,7 +47,7 @@ event UpdateEyeHeight(float DeltaTime)
 {
     local vector Delta;
 
-    if (Controller == None || Level.NetMode == NM_DedicatedServer || bTearOff
+    if (Controller == None || Level.NetMode == NM_DedicatedServer || bTearOff || PRI == None
         || !PRI.bAllowNewEyeHeightAlgorithm || !bNewEyeHeightAlgorithm)
     {
         Super.UpdateEyeHeight(DeltaTime);
@@ -129,7 +129,7 @@ function ServerChangedWeapon(Weapon OldWeapon, Weapon NewWeapon)
 simulated function Tick(float DeltaTime)
 {
     Super.Tick(DeltaTime);
-    if (PRI == None)
+    if (PRI == None && Controller != None)
     {
         PRI = class'NewNet_PRI'.static.GetPRI(Controller);
     }
