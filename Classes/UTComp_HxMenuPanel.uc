@@ -11,8 +11,6 @@ function InitComponent(GUIController MyController, GUIComponent MyOwner)
 {
     local int i;
 
-    super.InitComponent(MyController,MyOwner);
-
     for (i = 0; i < ServerOptions.Length; ++i)
     {
         Sections[SECTION_SERVER].ManageComponent(ServerOptions[i]);
@@ -22,6 +20,7 @@ function InitComponent(GUIController MyController, GUIComponent MyOwner)
     {
         Sections[SECTION_USER].ManageComponent(UserOptions[i]);
     }
+    super.InitComponent(MyController,MyOwner);
     SetVisibility(true);
 }
 
@@ -148,12 +147,10 @@ defaultproperties
 {
     Begin Object class=AltSectionBackground Name=ServerSection
         Caption="Server Options"
-        WinHeight=0.40
     End Object
 
     Begin Object class=AltSectionBackground Name=UserSection
         Caption="User Options"
-        WinHeight=0.24
     End Object
 
     Begin Object Class=HxMenuCheckBox Name=AllowNewNetWeapons
