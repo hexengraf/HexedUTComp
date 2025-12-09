@@ -7,12 +7,7 @@ Features kept:
 * Enhanced netcode (NewNet weapons)
 * New EyeHeight algorithm
   * View smoothing
-* Disable double damage
-* Number of Assault Rifle's grenades on spawn
-* Colored death messages
 * Timed overtime
-* Starting health
-* Starting shield
 
 All other features were removed.
 For widescreen fixes, use [foxWSFix](https://github.com/alexstrout/foxWSFix-UT2k4).
