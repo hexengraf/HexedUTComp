@@ -462,8 +462,8 @@ function UpdateAfterPropertyChange(string PropertyName, String PropertyValue)
 
 defaultproperties
 {
-    FriendlyName="Hexed UTComp v2dev"
-    Description="A minimalist fork of UTComp compatible with HexedUT."
+    FriendlyName="HexedUTComp v2"
+    Description="Cutdown version of UTComp to work with HexedUT, providing new eye height algorithm, enhanced netcode, and timed overtime."
     bAlwaysRelevant=True
     RemoteRole=ROLE_SimulatedProxy
     bAddToServerPackages=True
