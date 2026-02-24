@@ -1,16 +1,26 @@
-class UTComp_HxMenuPanel extends HxMenuPanel;
+class UTComp_HxMenuPanel extends HxMenuBasePanel;
 
 const SECTION_SERVER = 0;
 const SECTION_USER = 1;
 
-var automated array<HxMenuOption> ServerOptions;
-var automated array<HxMenuOption> UserOptions;
+var automated array<GUIMenuOption> ServerOptions;
+var automated array<GUIMenuOption> UserOptions;
 var NewNet_PRI PRI;
 
 function InitComponent(GUIController MyController, GUIComponent MyOwner)
 {
     local int i;
 
+    for (i = 0; i < ServerOptions.Length; ++i)
+    {
+        ServerOptions[i].OnLoadINI = RemoteOnLoadINI;
+        ServerOptions[i].OnChange = RemoteOnChange;
+    }
+    for (i = 0; i < UserOptions.Length; ++i)
+    {
+        UserOptions[i].OnLoadINI = DefaultOnLoadINI;
+        UserOptions[i].OnChange = UserOnChange;
+    }
     for (i = 0; i < ServerOptions.Length; ++i)
     {
         Sections[SECTION_SERVER].ManageComponent(ServerOptions[i]);
@@ -36,46 +46,76 @@ function bool Initialize()
 
 function Refresh()
 {
-    local int i;
-
-    for (i = 0; i < ServerOptions.Length; ++i)
-    {
-        ServerOptions[i].GetValueFrom(PRI);
-    }
-    UserOptions[0].SetComponentValue(class'UTComp_xPawn'.default.bEnhancedNetCode);
-    UserOptions[1].SetComponentValue(class'UTComp_xPawn'.default.bNewEyeHeightAlgorithm);
-    UserOptions[2].SetComponentValue(class'UTComp_xPawn'.default.bViewSmoothing);
     NewNetWeaponsAfterChange(PRI.bAllowNewNetWeapons);
     NewEyeHeightAlgorithmAfterChange(PRI.bAllowNewEyeHeightAlgorithm);
     HideSection(SECTION_SERVER, !IsAdmin(), HIDE_DUE_ADMIN);
     HideSection(SECTION_USER, false);
+    Super.Refresh();
 }
 
 function NewNetWeaponsAfterChange(coerce bool bEnable)
 {
     local int i;
 
-    for (i = 3; i < ServerOptions.Length; ++i)
+    if (bEnable)
     {
-        ServerOptions[i].SetEnable(bEnable);
+        for (i = 3; i < ServerOptions.Length; ++i)
+        {
+            EnableComponent(ServerOptions[i]);
+        }
+        EnableComponent(UserOptions[0]);
     }
-    UserOptions[0].SetEnable(bEnable);
+    else
+    {
+        for (i = 3; i < ServerOptions.Length; ++i)
+        {
+            DisableComponent(ServerOptions[i]);
+        }
+        DisableComponent(UserOptions[0]);
+    }
+
 }
 
 function NewEyeHeightAlgorithmAfterChange(coerce bool bEnable)
 {
-    UserOptions[1].SetEnable(bEnable);
-    UserOptions[2].SetEnable(bEnable && class'UTComp_xPawn'.default.bNewEyeHeightAlgorithm);
+    if (bEnable)
+    {
+        EnableComponent(UserOptions[1]);
+        if (class'UTComp_xPawn'.default.bNewEyeHeightAlgorithm)
+        {
+            EnableComponent(UserOptions[2]);
+        }
+        else
+        {
+            DisableComponent(UserOptions[2]);
+        }
+    }
+    else
+    {
+        DisableComponent(UserOptions[1]);
+        DisableComponent(UserOptions[2]);
+    }
 }
 
-function RemoteOnChange(GUIComponent C)
+function RemoteOnLoadINI(GUIComponent Sender, string s)
 {
-    local HxMenuOption Option;
+    local GUIMenuOption Option;
 
-    Option = HxMenuOption(C);
+    Option = GUIMenuOption(Sender);
+    if (PRI != None && Option != None)
+    {
+        Option.SetComponentValue(PRI.GetPropertyText(Option.INIOption));
+    }
+}
+
+function RemoteOnChange(GUIComponent Sender)
+{
+    local GUIMenuOption Option;
+
+    Option = GUIMenuOption(Sender);
     if (PRI != None && Option != None && IsAdmin())
     {
-        PRI.RemoteSetProperty(Option.PropertyName, Option.GetComponentValue());
+        PRI.RemoteSetProperty(Option.INIOption, Option.GetComponentValue());
     }
     switch (Option)
     {
@@ -88,21 +128,15 @@ function RemoteOnChange(GUIComponent C)
     }
 }
 
-function UserOnChange(GUIComponent C)
+function UserOnChange(GUIComponent Sender)
 {
-    local HxMenuOption Option;
+    local GUIMenuOption Option;
     local UTComp_xPawn Pawn;
 
-    Option = HxMenuOption(C);
+    Option = GUIMenuOption(Sender);
     if (Option == None)
     {
         return;
-    }
-    Pawn = UTComp_xPawn(PlayerOwner().Pawn);
-
-    if (Pawn != None)
-    {
-        Option.SetValueOn(Pawn);
     }
     switch (Option)
     {
@@ -116,6 +150,13 @@ function UserOnChange(GUIComponent C)
         case UserOptions[2]:
             class'UTComp_xPawn'.default.bViewSmoothing =  bool(Option.GetComponentValue());
             break;
+    }
+    Pawn = UTComp_xPawn(PlayerOwner().Pawn);
+    if (Pawn != None)
+    {
+        Pawn.bEnhancedNetCode = class'UTComp_xPawn'.default.bEnhancedNetCode;
+        Pawn.bNewEyeHeightAlgorithm = class'UTComp_xPawn'.default.bNewEyeHeightAlgorithm;
+        Pawn.bViewSmoothing = class'UTComp_xPawn'.default.bViewSmoothing;
     }
     class'UTComp_xPawn'.static.StaticSaveConfig();
 }
@@ -132,7 +173,7 @@ static function bool AddToMenu()
             default.ServerOptions[i].TabOrder = Order++;
             default.ServerOptions[i].Caption = class'MutUTComp'.default.PropertyInfoEntries[i].Caption;
             default.ServerOptions[i].Hint = class'MutUTComp'.default.PropertyInfoEntries[i].Hint;
-            default.ServerOptions[i].PropertyName = class'MutUTComp'.default.PropertyInfoEntries[i].Name;
+            default.ServerOptions[i].INIOption = class'MutUTComp'.default.PropertyInfoEntries[i].Name;
         }
         for (i = 0; i < default.UserOptions.Length; ++i)
         {
@@ -153,52 +194,47 @@ defaultproperties
         Caption="User Options"
     End Object
 
-    Begin Object Class=HxMenuCheckBox Name=AllowNewNetWeapons
-        OnChange=RemoteOnChange
+    Begin Object Class=moCheckBox Name=AllowNewNetWeapons
     End Object
 
-    Begin Object Class=HxMenuCheckBox Name=AllowNewEyeHeightAlgorithm
-        OnChange=RemoteOnChange
+    Begin Object Class=moCheckBox Name=AllowNewEyeHeightAlgorithm
     End Object
 
-    Begin Object class=HxMenuNumericEdit Name=TimedOvertime
+    Begin Object class=moNumericEdit Name=TimedOvertime
         MinValue=0
         MaxValue=3600
-        OnChange=RemoteOnChange
+        Step=10
+        ComponentWidth=0.25
     End Object
 
-    Begin Object class=HxMenuFloatEdit Name=PingTweenTime
+    Begin Object class=moFloatEdit Name=PingTweenTime
         MinValue=0.0
         MaxValue=10.0
         Step=0.1
-        OnChange=RemoteOnChange
+        ComponentWidth=0.25
     End Object
 
-    Begin Object class=HxMenuFloatEdit Name=PawnCollisionHistoryLength
+    Begin Object class=moFloatEdit Name=PawnCollisionHistoryLength
         MinValue=0.0
         MaxValue=10.0
         Step=0.1
-        OnChange=RemoteOnChange
+        ComponentWidth=0.25
     End Object
 
-    Begin Object Class=HxMenuCheckBox Name=EnhancedNetCode
+    Begin Object Class=moCheckBox Name=EnhancedNetCode
         Caption="Enable Enhanced Netcode"
-        PropertyName="bEnhancedNetCode"
-        OnChange=UserOnChange
+        INIOption="UTComp_xPawn bEnhancedNetCode"
     End Object
 
-    Begin Object Class=HxMenuCheckBox Name=NewEyeHeightAlgorithm
+    Begin Object Class=moCheckBox Name=NewEyeHeightAlgorithm
         Caption="Enable New EyeHeight Algorithm"
-        Hint="You want this"
-        PropertyName="bNewEyeHeightAlgorithm"
-        OnChange=UserOnChange
+        INIOption="UTComp_xPawn bNewEyeHeightAlgorithm"
     End Object
 
-    Begin Object Class=HxMenuCheckBox Name=ViewSmoothing
+    Begin Object Class=moCheckBox Name=ViewSmoothing
         Caption="View smoothing"
         Hint="Smooth the view when using new EyeHeight algorithm"
-        PropertyName="bViewSmoothing"
-        OnChange=UserOnChange
+        INIOption="UTComp_xPawn bViewSmoothing"
     End Object
 
     PanelCaption="UTComp"

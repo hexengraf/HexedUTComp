@@ -32,7 +32,7 @@ simulated function PreBeginPlay()
     if (Level.NetMode != NM_DedicatedServer)
     {
         class'UTComp_HxMenuPanel'.static.AddToMenu();
-        class'HxSounds'.static.AddHitSound(Sound'HitSound');
+        class'HxHitEffects'.static.AddHitSound(Sound'HitSound');
     }
 }
 
@@ -462,8 +462,8 @@ function UpdateAfterPropertyChange(string PropertyName, String PropertyValue)
 
 defaultproperties
 {
-    FriendlyName="HexedUTComp v2"
-    Description="Cutdown version of UTComp to work with HexedUT, providing new eye height algorithm, enhanced netcode, and timed overtime."
+    FriendlyName="HexedUTComp v3"
+    Description="Cutdown version of UTComp providing new eye height algorithm, enhanced netcode, and timed overtime."
     bAlwaysRelevant=True
     RemoteRole=ROLE_SimulatedProxy
     bAddToServerPackages=True
