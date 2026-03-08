@@ -1,7 +1,7 @@
-class UTComp_HxMenuPanel extends HxMenuBasePanel;
+class UTComp_HxMenuPanel extends HxGUIMenuBasePanel;
 
-const SECTION_SERVER = 0;
-const SECTION_USER = 1;
+const SECTION_USER = 0;
+const SECTION_SERVER = 1;
 
 var automated array<GUIMenuOption> ServerOptions;
 var automated array<GUIMenuOption> UserOptions;
@@ -23,12 +23,12 @@ function InitComponent(GUIController MyController, GUIComponent MyOwner)
     }
     for (i = 0; i < ServerOptions.Length; ++i)
     {
-        Sections[SECTION_SERVER].ManageComponent(ServerOptions[i]);
+        Sections[SECTION_SERVER].Insert(ServerOptions[i]);
     }
 
     for (i = 0; i < UserOptions.Length; ++i)
     {
-        Sections[SECTION_USER].ManageComponent(UserOptions[i]);
+        Sections[SECTION_USER].Insert(UserOptions[i]);
     }
     super.InitComponent(MyController,MyOwner);
     SetVisibility(true);
@@ -48,8 +48,8 @@ function Refresh()
 {
     NewNetWeaponsAfterChange(PRI.bAllowNewNetWeapons);
     NewEyeHeightAlgorithmAfterChange(PRI.bAllowNewEyeHeightAlgorithm);
-    HideSection(SECTION_SERVER, !IsAdmin(), HIDE_DUE_ADMIN);
-    HideSection(SECTION_USER, false);
+    Sections[SECTION_SERVER].SetHide(!IsAdmin(), HideDueAdmin);
+    Sections[SECTION_USER].SetHide(false);
     Super.Refresh();
 }
 
@@ -186,12 +186,16 @@ static function bool AddToMenu()
 
 defaultproperties
 {
-    Begin Object class=AltSectionBackground Name=ServerSection
+    Begin Object class=HxGUIFramedSection Name=ServerSection
         Caption="Server Options"
+        LineSpacing=0.02
+        bAutoSpacing=false
     End Object
 
-    Begin Object class=AltSectionBackground Name=UserSection
+    Begin Object class=HxGUIFramedSection Name=UserSection
         Caption="User Options"
+        LineSpacing=0.02
+        bAutoSpacing=false
     End Object
 
     Begin Object Class=moCheckBox Name=AllowNewNetWeapons
@@ -204,21 +208,21 @@ defaultproperties
         MinValue=0
         MaxValue=3600
         Step=10
-        ComponentWidth=0.25
+        ComponentWidth=0.2
     End Object
 
     Begin Object class=moFloatEdit Name=PingTweenTime
         MinValue=0.0
         MaxValue=10.0
         Step=0.1
-        ComponentWidth=0.25
+        ComponentWidth=0.2
     End Object
 
     Begin Object class=moFloatEdit Name=PawnCollisionHistoryLength
         MinValue=0.0
         MaxValue=10.0
         Step=0.1
-        ComponentWidth=0.25
+        ComponentWidth=0.2
     End Object
 
     Begin Object Class=moCheckBox Name=EnhancedNetCode
@@ -239,9 +243,9 @@ defaultproperties
 
     PanelCaption="UTComp"
     PanelHint="UTComp Features"
-    bDoubleColumn=false
-    Sections(0)=ServerSection
-    Sections(1)=UserSection
+    bDoubleColumn=true
+    Sections(0)=UserSection
+    Sections(1)=ServerSection
     ServerOptions(0)=AllowNewNetWeapons
     ServerOptions(1)=AllowNewEyeHeightAlgorithm
     ServerOptions(2)=TimedOvertime

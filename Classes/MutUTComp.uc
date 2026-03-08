@@ -32,7 +32,6 @@ simulated function PreBeginPlay()
     if (Level.NetMode != NM_DedicatedServer)
     {
         class'UTComp_HxMenuPanel'.static.AddToMenu();
-        class'HxHitEffects'.static.AddHitSound(Sound'HitSound');
     }
 }
 
@@ -462,7 +461,7 @@ function UpdateAfterPropertyChange(string PropertyName, String PropertyValue)
 
 defaultproperties
 {
-    FriendlyName="HexedUTComp v3"
+    FriendlyName="HexedUTComp v4"
     Description="Cutdown version of UTComp providing new eye height algorithm, enhanced netcode, and timed overtime."
     bAlwaysRelevant=True
     RemoteRole=ROLE_SimulatedProxy
@@ -472,8 +471,8 @@ defaultproperties
     PropertyInfoEntries(0)=(Name="bAllowNewNetWeapons",Caption="Allow NewNet Weapons",Hint="Allow clients to enable/disable the NewNet Weapons.",PIType="Check",bMultiplayerOnly=true,bAdvanced=true)
     PropertyInfoEntries(1)=(Name="bAllowNewEyeHeightAlgorithm",Caption="Allow new EyeHeight algorithm",Hint="Allow clients to enable/disable the new EyeHeight algorithm.",PIType="Check")
     PropertyInfoEntries(2)=(Name="TimedOvertime",Caption="Timed overtime duration",PIType="Text",Hint="Duration of timed overtime (in seconds).",PIExtras="0;0:3600")
-    PropertyInfoEntries(3)=(Name="PingTweenTime",Caption="NewNet Ping Tween Time (3.0)",Hint="NewNet Ping Tween Time (3.0).",PIType="Text",PIExtras="0;0.0:1000",bMultiplayerOnly=true,bAdvanced=true)
-    PropertyInfoEntries(4)=(Name="PawnCollisionHistoryLength",Caption="NewNet Pawn Collision History Length (0.35)",Hint="NewNet Pawn Collision History Length (0.35).",PIType="Text",PIExtras="0;0.0:1000",bMultiplayerOnly=true,bAdvanced=true)
+    PropertyInfoEntries(3)=(Name="PingTweenTime",Caption="Ping Tween Time",Hint="NewNet Ping Tween Time (3.0).",PIType="Text",PIExtras="0;0.0:1000",bMultiplayerOnly=true,bAdvanced=true)
+    PropertyInfoEntries(4)=(Name="PawnCollisionHistoryLength",Caption="Pawn Collision History Length",Hint="NewNet Pawn Collision History Length (0.35).",PIType="Text",PIExtras="0;0.0:1000",bMultiplayerOnly=true,bAdvanced=true)
 
     // configs
     bAllowNewNetWeapons=True
