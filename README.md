@@ -10,7 +10,6 @@ Features kept:
 * Timed overtime
 
 All other features were removed.
-For widescreen fixes, use [foxWSFix](https://github.com/alexstrout/foxWSFix-UT2k4).
 
 Other changes:
 * The GUI was reworked to be displayed through HexedUT's menu.
