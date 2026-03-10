@@ -434,6 +434,12 @@ simulated function Reset()
     }
 }
 
+function NotifyLogout(Controller Exiting)
+{
+    DestroyLinkedPRI(Exiting.PlayerReplicationInfo, class'NewNet_PRI');
+    Super.NotifyLogout(Exiting);
+}
+
 function UpdatePRI(NewNet_PRI PRI)
 {
     PRI.bAllowNewNetWeapons = bAllowNewNetWeapons;
