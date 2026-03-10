@@ -8,7 +8,7 @@ var FakeProjectileManager FPM;
 function PlayFiring()
 {
     super.PlayFiring();
-    if(Level.NetMode != NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
+    if(Level.NetMode != NM_Client || !class'NewNet_Client'.static.IsEnhancedNetcodeEnabled())
        return;
     CheckFireEffect();
 }

@@ -1,27 +1,20 @@
 class UTComp_xPawn extends xPawn;
 
-var config bool bEnhancedNetCode;
 var config bool bNewEyeHeightAlgorithm;
 var config bool bViewSmoothing;
-
 var bool bAllowNewEyeHeightAlgorithm;
+
 // UpdateEyeHeight related
-var EPhysics OldPhysics2;
-var vector OldLocation;
-var float OldBaseEyeHeight;
-var int IgnoreZChangeTicks;
-var float EyeHeightOffset;
+var private EPhysics OldPhysics2;
+var private vector OldLocation;
+var private float OldBaseEyeHeight;
+var private int IgnoreZChangeTicks;
+var private float EyeHeightOffset;
 
 replication
 {
     reliable if (Role == ROLE_Authority)
         bAllowNewEyeHeightAlgorithm;
-
-    reliable if (Role < Role_Authority)
-        TurnOffNetCode;
-
-    reliable if(Role == ROLE_Authority)
-        ClientResetNetcode;
 }
 
 simulated event PostNetBeginPlay()
@@ -146,81 +139,9 @@ simulated function Tick(float DeltaTime)
     }
 }
 
-function TurnOffNetCode()
-{
-    local inventory Inv;
-
-    for (Inv = Inventory; Inv != None; Inv = Inv.inventory)
-    {
-        if (Weapon(Inv) != None)
-        {
-            if (NewNet_AssaultRifle(Inv) != None)
-            {
-                NewNet_AssaultRifle(Inv).DisableNet();
-            }
-            else if (NewNet_BioRifle(Inv) != None)
-            {
-                NewNet_BioRifle(Inv).DisableNet();
-            }
-            else if (NewNet_ShockRifle(Inv) != None)
-            {
-                NewNet_ShockRifle(Inv).DisableNet();
-            }
-            else if (NewNet_MiniGun(Inv) != None)
-            {
-                NewNet_MiniGun(Inv).DisableNet();
-            }
-            else if (NewNet_LinkGun(Inv) != None)
-            {
-                NewNet_LinkGun(Inv).DisableNet();
-            }
-            else if (NewNet_RocketLauncher(Inv) != None)
-            {
-                NewNet_RocketLauncher(Inv).DisableNet();
-            }
-            else if (NewNet_FlakCannon(Inv) != None)
-            {
-                NewNet_FlakCannon(Inv).DisableNet();
-            }
-            else if (NewNet_SniperRifle(Inv) != None)
-            {
-                NewNet_SniperRifle(Inv).DisableNet();
-            }
-            else if (NewNet_ClassicSniperRifle(Inv) != None)
-            {
-                NewNet_ClassicSniperRifle(Inv).DisableNet();
-            }
-        }
-    }
-}
-
-simulated function SetEnhancedNetCode(bool bEnable)
-{
-    bEnhancedNetCode = bEnable;
-    Default.bEnhancedNetCode = bEnable;
-    if (!bEnable)
-    {
-        TurnOffNetCode();
-    }
-}
-
-simulated function ClientResetNetcode()
-{
-    local Timestamp_Pawn P;
-
-    ForEach DynamicActors(class'Timestamp_Pawn', P)
-    {
-        if(P != None)
-        {
-            P.Destroy();
-        }
-    }
-}
-
 defaultproperties
 {
     bAlwaysRelevant=True
-    bEnhancedNetCode=True
     bNewEyeHeightAlgorithm=True
     bViewSmoothing=True
 }

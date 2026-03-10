@@ -45,7 +45,7 @@ function bool Initialize()
 
 function Refresh()
 {
-    NewNetWeaponsAfterChange(PRI.bAllowNewNetWeapons);
+    NewNetWeaponsAfterChange(PRI.bAllowEnhancedNetcode);
     NewEyeHeightAlgorithmAfterChange(PRI.bAllowNewEyeHeightAlgorithm);
     Sections[SECTION_SERVER].SetHide(!IsAdmin(), HideDueAdmin);
     Sections[SECTION_USER].SetHide(false);
@@ -140,7 +140,7 @@ function UserOnChange(GUIComponent Sender)
     switch (Option)
     {
         case UserOptions[0]:
-            class'UTComp_xPawn'.default.bEnhancedNetCode = bool(Option.GetComponentValue());
+            class'NewNet_Client'.static.SetEnhancedNetCode(bool(Option.GetComponentValue()));
             break;
         case UserOptions[1]:
             class'UTComp_xPawn'.default.bNewEyeHeightAlgorithm = bool(Option.GetComponentValue());
@@ -153,7 +153,6 @@ function UserOnChange(GUIComponent Sender)
     Pawn = UTComp_xPawn(PlayerOwner().Pawn);
     if (Pawn != None)
     {
-        Pawn.bEnhancedNetCode = class'UTComp_xPawn'.default.bEnhancedNetCode;
         Pawn.bNewEyeHeightAlgorithm = class'UTComp_xPawn'.default.bNewEyeHeightAlgorithm;
         Pawn.bViewSmoothing = class'UTComp_xPawn'.default.bViewSmoothing;
     }
@@ -226,7 +225,7 @@ defaultproperties
 
     Begin Object Class=moCheckBox Name=EnhancedNetCode
         Caption="Enable Enhanced Netcode"
-        INIOption="UTComp_xPawn bEnhancedNetCode"
+        INIOption="NewNet_Client bEnhancedNetCode"
     End Object
 
     Begin Object Class=moCheckBox Name=NewEyeHeightAlgorithm

@@ -28,7 +28,7 @@ function PlayFiring()
 {
    super.PlayFiring();
 
-   if(Level.NetMode != NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
+   if(Level.NetMode != NM_Client || !class'NewNet_Client'.static.IsEnhancedNetcodeEnabled())
        return;
    if(!bSkipNextEffect)
        CheckFireEffect();
@@ -147,7 +147,7 @@ function projectile SpawnProjectile(Vector Start, Rotator Dir)
     local vector End, HitLocation, HitNormal, VZ;
     local actor Other;
 
-    if(Level.NetMode == NM_Client && (UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
+    if(Level.NetMode == NM_Client && class'NewNet_Client'.static.IsEnhancedNetcodeEnabled())
         return SpawnFakeProjectile(Start,Dir);
 
     if(!bUseEnhancedNetCode)

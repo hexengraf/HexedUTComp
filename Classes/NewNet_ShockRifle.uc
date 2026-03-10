@@ -37,7 +37,7 @@ function DisableNet()
 //// client only ////
 simulated event ClientStartFire(int Mode)
 {
-    if(Level.NetMode!=NM_Client || !(UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode) || NewNet_ShockBeamFire(FireMode[Mode]) == None)
+    if(Level.NetMode!=NM_Client || !class'NewNet_Client'.static.IsEnhancedNetcodeEnabled() || NewNet_ShockBeamFire(FireMode[Mode]) == None)
         super.ClientStartFire(mode);
     else
         NewNet_ClientStartFire(mode);

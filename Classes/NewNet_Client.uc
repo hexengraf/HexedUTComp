@@ -16,9 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-class NewNet_Client extends HxClientReplicationInfo;
+class NewNet_Client extends HxClientReplicationInfo
+    config(User);
 
-var bool bAllowNewNetWeapons;
+var config bool bEnhancedNetCode;
+
+var bool bAllowEnhancedNetcode;
 var bool bAllowNewEyeHeightAlgorithm;
 var int TimedOvertime;
 var float PingTweenTime;
@@ -35,17 +38,17 @@ var int numPings;
 replication
 {
     reliable if (Role == ROLE_Authority)
-        bAllowNewNetWeapons,
+        bAllowEnhancedNetcode,
         bAllowNewEyeHeightAlgorithm,
         TimedOvertime,
         PingTweenTime,
         PawnCollisionHistoryLength;
 
     reliable if (Role == ROLE_Authority)
-        Pong;
+        Pong, ClientResetNetcode;
 
     reliable if (Role < ROLE_Authority)
-        Ping, RemoteSetProperty;
+        Ping, RemoteSetProperty, TurnOffNetCode;
 }
 
 simulated event PreBeginPlay()
@@ -97,14 +100,85 @@ simulated function Tick(float DeltaTime)
     }
 }
 
+simulated function ClientResetNetcode()
+{
+    local Timestamp_Pawn P;
+
+    ForEach PC.DynamicActors(class'Timestamp_Pawn', P)
+    {
+        P.Destroy();
+    }
+}
+
 function Update()
 {
-    bAllowNewNetWeapons = UTComp.bAllowNewNetWeapons;
+    bAllowEnhancedNetcode = UTComp.bAllowEnhancedNetcode;
     bAllowNewEyeHeightAlgorithm = UTComp.bAllowNewEyeHeightAlgorithm;
     TimedOvertime = UTComp.TimedOvertime;
     PingTweenTime = UTComp.PingTweenTime;
     PawnCollisionHistoryLength = UTComp.PawnCollisionHistoryLength;
     NetUpdateTime = Level.TimeSeconds - 1;
+}
+
+function TurnOffNetCode()
+{
+    local inventory Inv;
+
+    if (PC.Pawn != None)
+    {
+        for (Inv = PC.Pawn.Inventory; Inv != None; Inv = Inv.inventory)
+        {
+            if (Weapon(Inv) != None)
+            {
+                if (NewNet_AssaultRifle(Inv) != None)
+                {
+                    NewNet_AssaultRifle(Inv).DisableNet();
+                }
+                else if (NewNet_BioRifle(Inv) != None)
+                {
+                    NewNet_BioRifle(Inv).DisableNet();
+                }
+                else if (NewNet_ShockRifle(Inv) != None)
+                {
+                    NewNet_ShockRifle(Inv).DisableNet();
+                }
+                else if (NewNet_MiniGun(Inv) != None)
+                {
+                    NewNet_MiniGun(Inv).DisableNet();
+                }
+                else if (NewNet_LinkGun(Inv) != None)
+                {
+                    NewNet_LinkGun(Inv).DisableNet();
+                }
+                else if (NewNet_RocketLauncher(Inv) != None)
+                {
+                    NewNet_RocketLauncher(Inv).DisableNet();
+                }
+                else if (NewNet_FlakCannon(Inv) != None)
+                {
+                    NewNet_FlakCannon(Inv).DisableNet();
+                }
+                else if (NewNet_SniperRifle(Inv) != None)
+                {
+                    NewNet_SniperRifle(Inv).DisableNet();
+                }
+                else if (NewNet_ClassicSniperRifle(Inv) != None)
+                {
+                    NewNet_ClassicSniperRifle(Inv).DisableNet();
+                }
+            }
+        }
+    }
+}
+
+static function SetEnhancedNetCode(bool bEnable)
+{
+    if (!bEnable && default.CRIs.Length > 0)
+    {
+        NewNet_Client(default.CRIs[0]).TurnOffNetCode();
+    }
+    default.bEnhancedNetCode = bEnable;
+    StaticSaveConfig();
 }
 
 static function NewNet_Client SpawnPRI(PlayerController PC, MutUTComp UTComp)
@@ -125,9 +199,16 @@ static function bool DestroyPRI(PlayerController PC)
     return DestroyClientReplicationInfo(PC);
 }
 
-static simulated function NewNet_Client GetPRI(PlayerController PC)
+static function NewNet_Client GetPRI(PlayerController PC)
 {
     return NewNet_Client(GetClientReplicationInfo(PC));
+}
+
+static function bool IsEnhancedNetcodeEnabled()
+{
+    return default.bEnhancedNetCode
+        && default.CRIs.Length > 0
+        && NewNet_Client(default.CRIs[0]).bAllowEnhancedNetcode;
 }
 
 defaultproperties
@@ -136,4 +217,5 @@ defaultproperties
     NetPriority=5
     PingTweenTime=3.0
     bPingReceived=True
+    bEnhancedNetCode=True
 }

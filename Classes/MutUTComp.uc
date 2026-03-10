@@ -4,7 +4,7 @@ class MutUTComp extends HxMutator;
 
 const AVERDT_SEND_PERIOD = 4.00;
 
-var config bool bAllowNewNetWeapons;
+var config bool bAllowEnhancedNetcode;
 var config bool bAllowNewEyeHeightAlgorithm;
 var config int TimedOvertime;
 var config float PingTweenTime;
@@ -28,11 +28,11 @@ var bool bDefaultWeaponsChanged;
 function PreBeginPlay()
 {
     Super.PreBeginPlay();
-    if (bAllowNewNetWeapons || bAllowNewEyeHeightAlgorithm)
+    if (bAllowEnhancedNetcode || bAllowNewEyeHeightAlgorithm)
     {
         ReplacePawn();
     }
-    if (bAllowNewNetWeapons)
+    if (bAllowEnhancedNetcode)
     {
         SetupTimeStamps();
         SetupInstagib();
@@ -49,7 +49,7 @@ function ReplacePawn()
     else
     {
         Warn(Name@"failed to replace xPawn class with UTComp_xPawn, disabling features.");
-        bAllowNewNetWeapons = False;
+        bAllowEnhancedNetcode = False;
         bAllowNewEyeHeightAlgorithm = False;
     }
 }
@@ -107,7 +107,7 @@ event PostBeginPlay()
 
 function ModifyPlayer(Pawn Other)
 {
-    if (bAllowNewNetWeapons)
+    if (bAllowEnhancedNetcode)
     {
         SpawnCollisionCopy(Other);
         RemoveOldPawns();
@@ -216,7 +216,7 @@ function ReplaceOtherMutatorWeapons()
 
 simulated function Tick(float DeltaTime)
 {
-    if (bAllowNewNetWeapons)
+    if (bAllowEnhancedNetcode)
     {
         if (Level.NetMode == NM_DedicatedServer || Level.NetMode == NM_ListenServer)
         {
@@ -272,7 +272,7 @@ function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
     {
         class'NewNet_Client'.static.SpawnPRI(PlayerController(Other), Self);
     }
-    if (bAllowNewNetWeapons)
+    if (bAllowEnhancedNetcode)
     {
         if (xWeaponBase(Other) != None)
         {
@@ -346,7 +346,7 @@ function GetServerDetails(out GameInfo.ServerResponseLine ServerState)
     i = ServerState.ServerInfo.Length;
     ServerState.ServerInfo.Length = i + 1;
     ServerState.ServerInfo[i].Key = "NewNet Weapons";
-    if (bAllowNewNetWeapons)
+    if (bAllowEnhancedNetcode)
     {
         ServerState.ServerInfo[i++].Value = "Allowed";
     }
@@ -388,6 +388,7 @@ function GetServerDetails(out GameInfo.ServerResponseLine ServerState)
 */
 simulated function Reset()
 {
+    local NewNet_Client Client;
     local Controller C;
 
     if (Level.NetMode != NM_Client)
@@ -395,9 +396,10 @@ simulated function Reset()
         // remove all Timestamp_pawn from clients
         for(C = Level.ControllerList;C != None;C = C.NextController)
         {
-            if(UTComp_xPawn(C.Pawn) != None)
+            Client = class'NewNet_Client'.static.GetPRI(PlayerController(C));
+            if(Client != None)
             {
-                UTComp_xPawn(C.Pawn).ClientResetNetcode();
+                Client.ClientResetNetcode();
             }
         }
         // delete these server side, the get recreated in SetPawnStamp function
@@ -446,14 +448,14 @@ defaultproperties
     bAddToServerPackages=True
     MutatorGroup="HexedUTComp"
 
-    PropertyInfoEntries(0)=(Name="bAllowNewNetWeapons",Caption="Allow NewNet Weapons",Hint="Allow clients to enable/disable the NewNet Weapons.",PIType="Check",bMultiplayerOnly=true,bAdvanced=true)
+    PropertyInfoEntries(0)=(Name="bAllowEnhancedNetcode",Caption="Allow NewNet Weapons",Hint="Allow clients to enable/disable the NewNet Weapons.",PIType="Check",bMultiplayerOnly=true,bAdvanced=true)
     PropertyInfoEntries(1)=(Name="bAllowNewEyeHeightAlgorithm",Caption="Allow new EyeHeight algorithm",Hint="Allow clients to enable/disable the new EyeHeight algorithm.",PIType="Check")
     PropertyInfoEntries(2)=(Name="TimedOvertime",Caption="Timed overtime duration",PIType="Text",Hint="Duration of timed overtime (in seconds).",PIExtras="0;0:3600")
     PropertyInfoEntries(3)=(Name="PingTweenTime",Caption="Ping Tween Time",Hint="NewNet Ping Tween Time (3.0).",PIType="Text",PIExtras="0;0.0:1000",bMultiplayerOnly=true,bAdvanced=true)
     PropertyInfoEntries(4)=(Name="PawnCollisionHistoryLength",Caption="Pawn Collision History Length",Hint="NewNet Pawn Collision History Length (0.35).",PIType="Text",PIExtras="0;0.0:1000",bMultiplayerOnly=true,bAdvanced=true)
 
     // configs
-    bAllowNewNetWeapons=True
+    bAllowEnhancedNetcode=True
     bAllowNewEyeHeightAlgorithm=True
     TimedOvertime=0
     PingTweenTime=3.0

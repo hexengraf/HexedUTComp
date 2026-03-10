@@ -60,7 +60,7 @@ simulated function ClientStartFire(int mode)
     }
     else
     {
-        if((UTComp_xPawn(Owner) != None && UTComp_xPawn(Owner).bEnhancedNetCode))
+        if(class'NewNet_Client'.static.IsEnhancedNetcodeEnabled())
             NewNet_ClientStartFire(mode);
         else
             super(Weapon).ClientStartFire(mode);
