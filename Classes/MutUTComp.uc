@@ -25,18 +25,9 @@ var class<Weapon> WeaponClasses[13];
 var class<Weapon> NewNetWeaponClasses[13];
 var bool bDefaultWeaponsChanged;
 
-simulated function PreBeginPlay()
+function PreBeginPlay()
 {
     Super.PreBeginPlay();
-    ServerPreBeginPlay();
-    if (Level.NetMode != NM_DedicatedServer)
-    {
-        class'UTComp_HxMenuPanel'.static.AddToMenu();
-    }
-}
-
-function ServerPreBeginPlay()
-{
     if (bAllowNewNetWeapons || bAllowNewEyeHeightAlgorithm)
     {
         ReplacePawn();
@@ -120,6 +111,10 @@ function ModifyPlayer(Pawn Other)
     {
         SpawnCollisionCopy(Other);
         RemoveOldPawns();
+    }
+    if (UTComp_xPawn(Other) != None)
+    {
+        UTComp_xPawn(Other).bAllowNewEyeHeightAlgorithm = bAllowNewEyeHeightAlgorithm;
     }
     Super.ModifyPlayer(Other);
 }
@@ -268,27 +263,14 @@ simulated function float GetStamp(int stamp)
    return StampArray[stamp % 256];
 }
 
-function SpawnNewNet_PRI(PlayerReplicationInfo PRI)
-{
-    local NewNet_PRI NewNetPRI;
-
-    if (PlayerController(PRI.Owner) != None && MessagingSpectator(PRI.Owner) == None)
-    {
-        NewNetPRI = NewNet_PRI(SpawnLinkedPRI(PRI, class'NewNet_PRI'));
-        NewNetPRI.UTComp = self;
-        NewNetPRI.PC = PlayerController(PRI.Owner);
-        UpdatePRI(NewNetPRI);
-    }
-}
-
 function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
 {
     local int x, i;
     local WeaponLocker L;
 
-    if (PlayerReplicationInfo(Other) != None)
+    if (Other.IsA('PlayerController'))
     {
-        SpawnNewNet_PRI(PlayerReplicationInfo(Other));
+        class'NewNet_Client'.static.SpawnPRI(PlayerController(Other), Self);
     }
     if (bAllowNewNetWeapons)
     {
@@ -436,38 +418,28 @@ simulated function Reset()
 
 function NotifyLogout(Controller Exiting)
 {
-    DestroyLinkedPRI(Exiting.PlayerReplicationInfo, class'NewNet_PRI');
+    class'NewNet_Client'.static.DestroyPRI(PlayerController(Exiting));
     Super.NotifyLogout(Exiting);
-}
-
-function UpdatePRI(NewNet_PRI PRI)
-{
-    PRI.bAllowNewNetWeapons = bAllowNewNetWeapons;
-    PRI.bAllowNewEyeHeightAlgorithm = bAllowNewEyeHeightAlgorithm;
-    PRI.TimedOvertime = TimedOvertime;
-    PRI.PingTweenTime = PingTweenTime;
-    PRI.PawnCollisionHistoryLength = PawnCollisionHistoryLength;
-    PRI.NetUpdateTime = Level.TimeSeconds - 1;
 }
 
 function UpdateAfterPropertyChange(string PropertyName, String PropertyValue)
 {
-    local NewNet_PRI PRI;
+    local NewNet_Client PRI;
     local Controller C;
 
     for (C = Level.ControllerList; C != None; C = C.NextController)
     {
-        PRI = class'NewNet_PRI'.static.GetPRI(C);
+        PRI = class'NewNet_Client'.static.GetPRI(PlayerController(C));
         if (PRI != None)
         {
-            UpdatePRI(PRI);
+            PRI.Update();
         }
     }
 }
 
 defaultproperties
 {
-    FriendlyName="HexedUTComp v4"
+    FriendlyName="HexedUTComp v5T1"
     Description="Cutdown version of UTComp providing new eye height algorithm, enhanced netcode, and timed overtime."
     bAlwaysRelevant=True
     RemoteRole=ROLE_SimulatedProxy

@@ -60,7 +60,7 @@ simulated function bool CheckForFakeProj()
      local float ping;
      local Projectile FP;
 
-     ping = FMax(0.0, class'NewNet_PRI'.default.PredictedPing - 0.5*class'TimeStamp'.default.AverDT);
+     ping = FMax(0.0, class'NewNet_Client'.default.PredictedPing - 0.5*class'TimeStamp'.default.AverDT);
 
      if(FPM == none)
         FindFPM();

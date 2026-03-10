@@ -5,7 +5,7 @@ const SECTION_SERVER = 1;
 
 var automated array<GUIMenuOption> ServerOptions;
 var automated array<GUIMenuOption> UserOptions;
-var NewNet_PRI PRI;
+var NewNet_Client PRI;
 
 function InitComponent(GUIController MyController, GUIComponent MyOwner)
 {
@@ -21,6 +21,7 @@ function InitComponent(GUIController MyController, GUIComponent MyOwner)
         UserOptions[i].OnLoadINI = DefaultOnLoadINI;
         UserOptions[i].OnChange = UserOnChange;
     }
+    super.InitComponent(MyController,MyOwner);
     for (i = 0; i < ServerOptions.Length; ++i)
     {
         Sections[SECTION_SERVER].Insert(ServerOptions[i]);
@@ -30,8 +31,6 @@ function InitComponent(GUIController MyController, GUIComponent MyOwner)
     {
         Sections[SECTION_USER].Insert(UserOptions[i]);
     }
-    super.InitComponent(MyController,MyOwner);
-    SetVisibility(true);
 }
 
 function bool Initialize()
@@ -40,7 +39,7 @@ function bool Initialize()
     {
         return true;
     }
-    PRI = class'NewNet_PRI'.static.GetPRI(PlayerOwner());
+    PRI = class'NewNet_Client'.static.GetPRI(PlayerOwner());
     return PRI != None;
 }
 

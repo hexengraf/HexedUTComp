@@ -173,13 +173,13 @@ function CheckFireEffect()
 {
    if(Level.NetMode == NM_Client && Instigator.IsLocallyControlled())
    {
-       if(class'NewNet_PRI'.default.PredictedPing - SLACK > MAX_PROJECTILE_FUDGE)
+       if(class'NewNet_Client'.default.PredictedPing - SLACK > MAX_PROJECTILE_FUDGE)
        {
            OldInstigatorLocation = Instigator.Location;
            OldInstigatorEyePosition = Instigator.EyePosition();
            Weapon.GetViewAxes(OldXAxis,OldYAxis,OldZAxis);
            OldAim=AdjustAim(OldInstigatorLocation+OldInstigatorEyePosition, AimError);
-           SetTimer(class'NewNet_PRI'.default.PredictedPing - SLACK - MAX_PROJECTILE_FUDGE, false);
+           SetTimer(class'NewNet_Client'.default.PredictedPing - SLACK - MAX_PROJECTILE_FUDGE, false);
        }
        else
            DoClientFireEffect();
@@ -273,7 +273,7 @@ simulated function projectile SpawnFakeProjectile(Vector Start, Rotator Dir)
     if(FPM==None)
         FindFPM();
 
-    if(FPM.AllowFakeProjectile(FakeProjectileClass, NewNet_LinkGun(Weapon).CurIndex) && class'NewNet_PRI'.default.predictedping >= 0.050)
+    if(FPM.AllowFakeProjectile(FakeProjectileClass, NewNet_LinkGun(Weapon).CurIndex) && class'NewNet_Client'.default.predictedping >= 0.050)
     {
         p = Spawn(FakeProjectileClass,Weapon.Owner,, Start, Dir);
     }

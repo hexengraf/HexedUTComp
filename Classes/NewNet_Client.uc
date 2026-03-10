@@ -16,15 +16,16 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-class NewNet_PRI extends LinkedReplicationInfo;
+class NewNet_Client extends HxClientReplicationInfo;
 
 var bool bAllowNewNetWeapons;
 var bool bAllowNewEyeHeightAlgorithm;
 var int TimedOvertime;
 var float PingTweenTime;
 var float PawnCollisionHistoryLength;
+
 var MutUTComp UTComp;
-var PlayerController PC;
+var private PlayerController PC;
 
 var float PredictedPing;
 var float PingSendTime;
@@ -33,18 +34,28 @@ var int numPings;
 
 replication
 {
-    reliable if (Role < ROLE_Authority)
-        Ping;
-
-    reliable if (Role == ROLE_Authority && bNetOwner)
-        Pong;
+    reliable if (Role == ROLE_Authority)
+        bAllowNewNetWeapons,
+        bAllowNewEyeHeightAlgorithm,
+        TimedOvertime,
+        PingTweenTime,
+        PawnCollisionHistoryLength;
 
     reliable if (Role == ROLE_Authority)
-        bAllowNewNetWeapons, bAllowNewEyeHeightAlgorithm, TimedOvertime,
-        PingTweenTime, PawnCollisionHistoryLength;
+        Pong;
 
     reliable if (Role < ROLE_Authority)
-        RemoteSetProperty;
+        Ping, RemoteSetProperty;
+}
+
+simulated event PreBeginPlay()
+{
+    Super.PreBeginPlay();
+    if (Level.NetMode != NM_DedicatedServer)
+    {
+        class'UTComp_HxMenuPanel'.static.AddToMenu();
+    }
+    PC = PlayerController(Owner);
 }
 
 function RemoteSetProperty(string PropertyName, string PropertyValue)
@@ -86,19 +97,37 @@ simulated function Tick(float DeltaTime)
     }
 }
 
-static simulated function NewNet_PRI GetPRI(Controller C)
+function Update()
 {
-    local LinkedReplicationInfo LinkedPRI;
+    bAllowNewNetWeapons = UTComp.bAllowNewNetWeapons;
+    bAllowNewEyeHeightAlgorithm = UTComp.bAllowNewEyeHeightAlgorithm;
+    TimedOvertime = UTComp.TimedOvertime;
+    PingTweenTime = UTComp.PingTweenTime;
+    PawnCollisionHistoryLength = UTComp.PawnCollisionHistoryLength;
+    NetUpdateTime = Level.TimeSeconds - 1;
+}
 
-    if (C.PlayerReplicationInfo != None)
+static function NewNet_Client SpawnPRI(PlayerController PC, MutUTComp UTComp)
+{
+    local NewNet_Client Client;
+
+    Client = NewNet_Client(SpawnClientReplicationInfo(PC));
+    if (Client != None)
     {
-        LinkedPRI = C.PlayerReplicationInfo.CustomReplicationInfo;
-        while (LinkedPRI != None && NewNet_PRI(LinkedPRI) == None)
-        {
-            LinkedPRI = LinkedPRI.NextReplicationInfo;
-        }
+        Client.UTComp = UTComp;
+        Client.Update();
     }
-    return NewNet_PRI(LinkedPRI);
+    return Client;
+}
+
+static function bool DestroyPRI(PlayerController PC)
+{
+    return DestroyClientReplicationInfo(PC);
+}
+
+static simulated function NewNet_Client GetPRI(PlayerController PC)
+{
+    return NewNet_Client(GetClientReplicationInfo(PC));
 }
 
 defaultproperties
