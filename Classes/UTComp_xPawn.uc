@@ -47,8 +47,7 @@ event UpdateEyeHeight(float DeltaTime)
 {
     local vector Delta;
 
-    if (Controller == None || Level.NetMode == NM_DedicatedServer || bTearOff || PRI == None
-        || !PRI.bAllowNewEyeHeightAlgorithm || !bNewEyeHeightAlgorithm)
+    if (WantsOldUpdateEyeHeight())
     {
         Super.UpdateEyeHeight(DeltaTime);
         return;
@@ -83,12 +82,20 @@ event UpdateEyeHeight(float DeltaTime)
     Controller.AdjustView(DeltaTime);
 }
 
+function bool WantsOldUpdateEyeHeight()
+{
+    return Level.NetMode == NM_DedicatedServer
+        || Controller == None
+        || PRI == None
+        || !PRI.bAllowNewEyeHeightAlgorithm
+        || !bNewEyeHeightAlgorithm
+        || bJustLanded
+        || bLandRecovery
+        || bTearOff;
+}
+
 function bool WantsSmoothedView()
 {
-    if (Controller.IsInState('PlayerSwimming'))
-    {
-        return !bJustLanded;
-    }
     return ((Physics == PHYS_Walking || Physics == PHYS_Spider)
             && (bViewSmoothing || !bJustLanded))
         || (Physics == PHYS_Falling && OldPhysics2 == PHYS_Walking);
