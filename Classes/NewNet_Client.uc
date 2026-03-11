@@ -27,13 +27,12 @@ var int TimedOvertime;
 var float PingTweenTime;
 var float PawnCollisionHistoryLength;
 
-var MutUTComp UTComp;
-var private PlayerController PC;
-
 var float PredictedPing;
-var float PingSendTime;
-var bool bPingReceived;
-var int numPings;
+
+var private NewNet_Client LocalClient;
+var private float PingSendTime;
+var private bool bPingReceived;
+var private int numPings;
 
 replication
 {
@@ -48,7 +47,7 @@ replication
         Pong, ClientResetNetcode;
 
     reliable if (Role < ROLE_Authority)
-        Ping, RemoteSetProperty, TurnOffNetCode;
+        Ping, TurnOffNetCode;
 }
 
 simulated event PreBeginPlay()
@@ -56,16 +55,11 @@ simulated event PreBeginPlay()
     Super.PreBeginPlay();
     if (Level.NetMode != NM_DedicatedServer)
     {
+        if (Level.NetMode == NM_Client || Owner == Level.GetLocalPlayerController())
+        {
+            default.LocalClient = Self;
+        }
         class'UTComp_HxMenuPanel'.static.AddToMenu();
-    }
-    PC = PlayerController(Owner);
-}
-
-function RemoteSetProperty(string PropertyName, string PropertyValue)
-{
-    if (PC.PlayerReplicationInfo.bAdmin)
-    {
-        UTComp.SetProperty(PropertyName, PropertyValue);
     }
 }
 
@@ -102,16 +96,21 @@ simulated function Tick(float DeltaTime)
 
 simulated function ClientResetNetcode()
 {
+    local PlayerController PC;
     local Timestamp_Pawn P;
 
+    PC = Level.GetLocalPlayerController();
     ForEach PC.DynamicActors(class'Timestamp_Pawn', P)
     {
         P.Destroy();
     }
 }
 
-function Update()
+function UpdateAll()
 {
+    local MutUTComp UTComp;
+
+    UTComp = MutUTComp(MutatorOwner);
     bAllowEnhancedNetcode = UTComp.bAllowEnhancedNetcode;
     bAllowNewEyeHeightAlgorithm = UTComp.bAllowNewEyeHeightAlgorithm;
     TimedOvertime = UTComp.TimedOvertime;
@@ -120,52 +119,60 @@ function Update()
     NetUpdateTime = Level.TimeSeconds - 1;
 }
 
+function UpdateProperty(string PropertyName, String PropertyValue)
+{
+    UpdateAll();
+}
+
 function TurnOffNetCode()
 {
+    local PlayerController PC;
     local inventory Inv;
 
+    PC = PlayerController(Owner);
     if (PC.Pawn != None)
     {
         for (Inv = PC.Pawn.Inventory; Inv != None; Inv = Inv.inventory)
         {
-            if (Weapon(Inv) != None)
+            if (Weapon(Inv) == None)
             {
-                if (NewNet_AssaultRifle(Inv) != None)
-                {
-                    NewNet_AssaultRifle(Inv).DisableNet();
-                }
-                else if (NewNet_BioRifle(Inv) != None)
-                {
-                    NewNet_BioRifle(Inv).DisableNet();
-                }
-                else if (NewNet_ShockRifle(Inv) != None)
-                {
-                    NewNet_ShockRifle(Inv).DisableNet();
-                }
-                else if (NewNet_MiniGun(Inv) != None)
-                {
-                    NewNet_MiniGun(Inv).DisableNet();
-                }
-                else if (NewNet_LinkGun(Inv) != None)
-                {
-                    NewNet_LinkGun(Inv).DisableNet();
-                }
-                else if (NewNet_RocketLauncher(Inv) != None)
-                {
-                    NewNet_RocketLauncher(Inv).DisableNet();
-                }
-                else if (NewNet_FlakCannon(Inv) != None)
-                {
-                    NewNet_FlakCannon(Inv).DisableNet();
-                }
-                else if (NewNet_SniperRifle(Inv) != None)
-                {
-                    NewNet_SniperRifle(Inv).DisableNet();
-                }
-                else if (NewNet_ClassicSniperRifle(Inv) != None)
-                {
-                    NewNet_ClassicSniperRifle(Inv).DisableNet();
-                }
+                continue;
+            }
+            if (NewNet_AssaultRifle(Inv) != None)
+            {
+                NewNet_AssaultRifle(Inv).DisableNet();
+            }
+            else if (NewNet_BioRifle(Inv) != None)
+            {
+                NewNet_BioRifle(Inv).DisableNet();
+            }
+            else if (NewNet_ShockRifle(Inv) != None)
+            {
+                NewNet_ShockRifle(Inv).DisableNet();
+            }
+            else if (NewNet_MiniGun(Inv) != None)
+            {
+                NewNet_MiniGun(Inv).DisableNet();
+            }
+            else if (NewNet_LinkGun(Inv) != None)
+            {
+                NewNet_LinkGun(Inv).DisableNet();
+            }
+            else if (NewNet_RocketLauncher(Inv) != None)
+            {
+                NewNet_RocketLauncher(Inv).DisableNet();
+            }
+            else if (NewNet_FlakCannon(Inv) != None)
+            {
+                NewNet_FlakCannon(Inv).DisableNet();
+            }
+            else if (NewNet_SniperRifle(Inv) != None)
+            {
+                NewNet_SniperRifle(Inv).DisableNet();
+            }
+            else if (NewNet_ClassicSniperRifle(Inv) != None)
+            {
+                NewNet_ClassicSniperRifle(Inv).DisableNet();
             }
         }
     }
@@ -173,42 +180,24 @@ function TurnOffNetCode()
 
 static function SetEnhancedNetCode(bool bEnable)
 {
-    if (!bEnable && default.CRIs.Length > 0)
+    if (!bEnable && default.LocalClient != None)
     {
-        NewNet_Client(default.CRIs[0]).TurnOffNetCode();
+        default.LocalClient.TurnOffNetCode();
     }
     default.bEnhancedNetCode = bEnable;
     StaticSaveConfig();
 }
 
-static function NewNet_Client SpawnPRI(PlayerController PC, MutUTComp UTComp)
+static function NewNet_Client GetClient()
 {
-    local NewNet_Client Client;
-
-    Client = NewNet_Client(SpawnClientReplicationInfo(PC));
-    if (Client != None)
-    {
-        Client.UTComp = UTComp;
-        Client.Update();
-    }
-    return Client;
-}
-
-static function bool DestroyPRI(PlayerController PC)
-{
-    return DestroyClientReplicationInfo(PC);
-}
-
-static function NewNet_Client GetPRI(PlayerController PC)
-{
-    return NewNet_Client(GetClientReplicationInfo(PC));
+    return default.LocalClient;
 }
 
 static function bool IsEnhancedNetcodeEnabled()
 {
     return default.bEnhancedNetCode
-        && default.CRIs.Length > 0
-        && NewNet_Client(default.CRIs[0]).bAllowEnhancedNetcode;
+        && default.LocalClient != None
+        && default.LocalClient.bAllowEnhancedNetcode;
 }
 
 defaultproperties

@@ -268,10 +268,6 @@ function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
     local int x, i;
     local WeaponLocker L;
 
-    if (Other.IsA('PlayerController'))
-    {
-        class'NewNet_Client'.static.SpawnPRI(PlayerController(Other), Self);
-    }
     if (bAllowEnhancedNetcode)
     {
         if (xWeaponBase(Other) != None)
@@ -283,9 +279,8 @@ function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
                     xWeaponBase(Other).WeaponType = NewNetWeaponClasses[x];
                 }
             }
-            return True;
         }
-        if (WeaponPickup(Other) != None)
+        else if (WeaponPickup(Other) != None)
         {
             for (x = 0; x < ArrayCount(WeaponClasses); ++x)
             {
@@ -294,9 +289,8 @@ function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
                     WeaponPickup(Other).InventoryType = NewNetWeaponClasses[x];
                 }
             }
-            return True;
         }
-        if (WeaponLocker(Other) != None)
+        else if (WeaponLocker(Other) != None)
         {
             L = WeaponLocker(Other);
             for (x = 0; x < ArrayCount(WeaponClasses); x++)
@@ -309,10 +303,9 @@ function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
                     }
                 }
             }
-            return True;
         }
     }
-    return True;
+    return Super.CheckReplacement(Other, bSuperRelevant);
 }
 
 function String GetInventoryClassOverride(String InventoryClassName)
@@ -388,18 +381,16 @@ function GetServerDetails(out GameInfo.ServerResponseLine ServerState)
 */
 simulated function Reset()
 {
-    local NewNet_Client Client;
-    local Controller C;
+    local int i;
 
     if (Level.NetMode != NM_Client)
     {
         // remove all Timestamp_pawn from clients
-        for(C = Level.ControllerList;C != None;C = C.NextController)
+        for (i = 0; i < CRIs.Length; ++i)
         {
-            Client = class'NewNet_Client'.static.GetPRI(PlayerController(C));
-            if(Client != None)
+            if(NewNet_Client(CRIs[i]) != None)
             {
-                Client.ClientResetNetcode();
+                NewNet_Client(CRIs[i]).ClientResetNetcode();
             }
         }
         // delete these server side, the get recreated in SetPawnStamp function
@@ -418,27 +409,6 @@ simulated function Reset()
     }
 }
 
-function NotifyLogout(Controller Exiting)
-{
-    class'NewNet_Client'.static.DestroyPRI(PlayerController(Exiting));
-    Super.NotifyLogout(Exiting);
-}
-
-function UpdateAfterPropertyChange(string PropertyName, String PropertyValue)
-{
-    local NewNet_Client PRI;
-    local Controller C;
-
-    for (C = Level.ControllerList; C != None; C = C.NextController)
-    {
-        PRI = class'NewNet_Client'.static.GetPRI(PlayerController(C));
-        if (PRI != None)
-        {
-            PRI.Update();
-        }
-    }
-}
-
 defaultproperties
 {
     FriendlyName="HexedUTComp v5T1"
@@ -447,6 +417,7 @@ defaultproperties
     RemoteRole=ROLE_SimulatedProxy
     bAddToServerPackages=True
     MutatorGroup="HexedUTComp"
+    CRIClass=class'NewNet_Client'
 
     PropertyInfoEntries(0)=(Name="bAllowEnhancedNetcode",Caption="Allow NewNet Weapons",Hint="Allow clients to enable/disable the NewNet Weapons.",PIType="Check",bMultiplayerOnly=true,bAdvanced=true)
     PropertyInfoEntries(1)=(Name="bAllowNewEyeHeightAlgorithm",Caption="Allow new EyeHeight algorithm",Hint="Allow clients to enable/disable the new EyeHeight algorithm.",PIType="Check")

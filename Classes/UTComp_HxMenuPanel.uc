@@ -5,7 +5,7 @@ const SECTION_SERVER = 1;
 
 var automated array<GUIMenuOption> ServerOptions;
 var automated array<GUIMenuOption> UserOptions;
-var NewNet_Client PRI;
+var NewNet_Client Client;
 
 function InitComponent(GUIController MyController, GUIComponent MyOwner)
 {
@@ -35,18 +35,18 @@ function InitComponent(GUIController MyController, GUIComponent MyOwner)
 
 function bool Initialize()
 {
-    if (PRI != None)
+    if (Client != None)
     {
         return true;
     }
-    PRI = class'NewNet_Client'.static.GetPRI(PlayerOwner());
-    return PRI != None;
+    Client = class'NewNet_Client'.static.GetClient();
+    return Client != None;
 }
 
 function Refresh()
 {
-    NewNetWeaponsAfterChange(PRI.bAllowEnhancedNetcode);
-    NewEyeHeightAlgorithmAfterChange(PRI.bAllowNewEyeHeightAlgorithm);
+    NewNetWeaponsAfterChange(Client.bAllowEnhancedNetcode);
+    NewEyeHeightAlgorithmAfterChange(Client.bAllowNewEyeHeightAlgorithm);
     Sections[SECTION_SERVER].SetHide(!IsAdmin(), HideDueAdmin);
     Sections[SECTION_USER].SetHide(false);
     Super.Refresh();
@@ -101,9 +101,9 @@ function RemoteOnLoadINI(GUIComponent Sender, string s)
     local GUIMenuOption Option;
 
     Option = GUIMenuOption(Sender);
-    if (PRI != None && Option != None)
+    if (Client != None && Option != None)
     {
-        Option.SetComponentValue(PRI.GetPropertyText(Option.INIOption));
+        Option.SetComponentValue(Client.GetPropertyText(Option.INIOption));
     }
 }
 
@@ -112,9 +112,9 @@ function RemoteOnChange(GUIComponent Sender)
     local GUIMenuOption Option;
 
     Option = GUIMenuOption(Sender);
-    if (PRI != None && Option != None && IsAdmin())
+    if (Client != None && Option != None && IsAdmin())
     {
-        PRI.RemoteSetProperty(Option.INIOption, Option.GetComponentValue());
+        Client.RemoteSetProperty(Option.INIOption, Option.GetComponentValue());
     }
     switch (Option)
     {
@@ -144,7 +144,7 @@ function UserOnChange(GUIComponent Sender)
             break;
         case UserOptions[1]:
             class'UTComp_xPawn'.default.bNewEyeHeightAlgorithm = bool(Option.GetComponentValue());
-            NewEyeHeightAlgorithmAfterChange(PRI.bAllowNewEyeHeightAlgorithm);
+            NewEyeHeightAlgorithmAfterChange(Client.bAllowNewEyeHeightAlgorithm);
             break;
         case UserOptions[2]:
             class'UTComp_xPawn'.default.bViewSmoothing =  bool(Option.GetComponentValue());
