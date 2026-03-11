@@ -178,7 +178,7 @@ function TurnOffNetCode()
     }
 }
 
-static function SetEnhancedNetCode(bool bEnable)
+static function SetEnhancedNetCode(coerce bool bEnable)
 {
     if (!bEnable && default.LocalClient != None)
     {

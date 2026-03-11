@@ -5,21 +5,28 @@ const SECTION_SERVER = 1;
 
 var automated array<GUIMenuOption> ServerOptions;
 var automated array<GUIMenuOption> UserOptions;
-var NewNet_Client Client;
+
+var private NewNet_Client Client;
 
 function InitComponent(GUIController MyController, GUIComponent MyOwner)
 {
     local int i;
+    local int Order;
 
-    for (i = 0; i < ServerOptions.Length; ++i)
-    {
-        ServerOptions[i].OnLoadINI = RemoteOnLoadINI;
-        ServerOptions[i].OnChange = RemoteOnChange;
-    }
     for (i = 0; i < UserOptions.Length; ++i)
     {
+        UserOptions[i].TabOrder = Order++;
         UserOptions[i].OnLoadINI = DefaultOnLoadINI;
         UserOptions[i].OnChange = UserOnChange;
+    }
+    for (i = 0; i < ServerOptions.Length; ++i)
+    {
+        ServerOptions[i].TabOrder = Order++;
+        ServerOptions[i].Caption = class'MutUTComp'.default.PropertyInfoEntries[i].Caption;
+        ServerOptions[i].Hint = class'MutUTComp'.default.PropertyInfoEntries[i].Hint;
+        ServerOptions[i].INIOption = class'MutUTComp'.default.PropertyInfoEntries[i].Name;
+        ServerOptions[i].OnLoadINI = RemoteOnLoadINI;
+        ServerOptions[i].OnChange = RemoteOnChange;
     }
     super.InitComponent(MyController,MyOwner);
     for (i = 0; i < ServerOptions.Length; ++i)
@@ -56,44 +63,17 @@ function NewNetWeaponsAfterChange(coerce bool bEnable)
 {
     local int i;
 
-    if (bEnable)
+    for (i = 3; i < ServerOptions.Length; ++i)
     {
-        for (i = 3; i < ServerOptions.Length; ++i)
-        {
-            EnableComponent(ServerOptions[i]);
-        }
-        EnableComponent(UserOptions[0]);
+        SetEnable(ServerOptions[i], bEnable);
     }
-    else
-    {
-        for (i = 3; i < ServerOptions.Length; ++i)
-        {
-            DisableComponent(ServerOptions[i]);
-        }
-        DisableComponent(UserOptions[0]);
-    }
-
+    SetEnable(UserOptions[0], bEnable);
 }
 
 function NewEyeHeightAlgorithmAfterChange(coerce bool bEnable)
 {
-    if (bEnable)
-    {
-        EnableComponent(UserOptions[1]);
-        if (class'UTComp_xPawn'.default.bNewEyeHeightAlgorithm)
-        {
-            EnableComponent(UserOptions[2]);
-        }
-        else
-        {
-            DisableComponent(UserOptions[2]);
-        }
-    }
-    else
-    {
-        DisableComponent(UserOptions[1]);
-        DisableComponent(UserOptions[2]);
-    }
+    SetEnable(UserOptions[1], bEnable);
+    SetEnable(UserOptions[2], bEnable && class'UTComp_xPawn'.default.bNewEyeHeightAlgorithm);
 }
 
 function RemoteOnLoadINI(GUIComponent Sender, string s)
@@ -140,7 +120,7 @@ function UserOnChange(GUIComponent Sender)
     switch (Option)
     {
         case UserOptions[0]:
-            class'NewNet_Client'.static.SetEnhancedNetCode(bool(Option.GetComponentValue()));
+            class'NewNet_Client'.static.SetEnhancedNetCode(Option.GetComponentValue());
             break;
         case UserOptions[1]:
             class'UTComp_xPawn'.default.bNewEyeHeightAlgorithm = bool(Option.GetComponentValue());
@@ -157,29 +137,6 @@ function UserOnChange(GUIComponent Sender)
         Pawn.bViewSmoothing = class'UTComp_xPawn'.default.bViewSmoothing;
     }
     class'UTComp_xPawn'.static.StaticSaveConfig();
-}
-
-static function bool AddToMenu()
-{
-    local int i;
-    local int Order;
-
-    if (Super.AddToMenu())
-    {
-        for (i = 0; i < default.ServerOptions.Length; ++i)
-        {
-            default.ServerOptions[i].TabOrder = Order++;
-            default.ServerOptions[i].Caption = class'MutUTComp'.default.PropertyInfoEntries[i].Caption;
-            default.ServerOptions[i].Hint = class'MutUTComp'.default.PropertyInfoEntries[i].Hint;
-            default.ServerOptions[i].INIOption = class'MutUTComp'.default.PropertyInfoEntries[i].Name;
-        }
-        for (i = 0; i < default.UserOptions.Length; ++i)
-        {
-            default.UserOptions[i].TabOrder = Order++;
-        }
-        return true;
-    }
-    return false;
 }
 
 defaultproperties
