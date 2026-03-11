@@ -1,4 +1,4 @@
-class UTComp_HxMenuPanel extends HxGUIMenuBasePanel;
+class UTComp_HxMenuPanel extends HxGUIMenuPanel;
 
 const SECTION_USER = 0;
 const SECTION_SERVER = 1;
