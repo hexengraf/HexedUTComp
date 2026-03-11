@@ -410,7 +410,7 @@ simulated function Reset()
 
 defaultproperties
 {
-    FriendlyName="HexedUTComp v5T1"
+    FriendlyName="HexedUTComp v5"
     Description="Cutdown version of UTComp providing new eye height algorithm, enhanced netcode, and timed overtime."
     bAlwaysRelevant=True
     RemoteRole=ROLE_SimulatedProxy
