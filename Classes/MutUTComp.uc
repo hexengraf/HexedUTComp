@@ -48,8 +48,7 @@ function ReplacePawn()
     }
     else
     {
-        Warn(Name@"failed to replace xPawn class with UTComp_xPawn, disabling features.");
-        bAllowEnhancedNetcode = False;
+        Warn(Name@"failed to replace xPawn class, disabling new eye height algorithm.");
         bAllowNewEyeHeightAlgorithm = False;
     }
 }
