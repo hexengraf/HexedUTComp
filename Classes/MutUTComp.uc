@@ -10,20 +10,20 @@ var config int TimedOvertime;
 var config float PingTweenTime;
 var config float PawnCollisionHistoryLength;
 
-var float StampArray[256];
-var float Counter;
-var Controller CounterController;
 var PawnCollisionCopy PCC;
-var TimeStamp StampInfo;
-var float AverDT;
 var float ClientTimeStamp;
-var array<float> DeltaHistory;
-var FakeProjectileManager FPM;
-var float LastReplicatedAverDT;
+var float AverDT;
 
-var class<Weapon> WeaponClasses[13];
-var class<Weapon> NewNetWeaponClasses[13];
-var bool bDefaultWeaponsChanged;
+var private Controller CounterController;
+var private FakeProjectileManager FPM;
+var private TimeStamp StampInfo;
+var private float StampArray[256];
+var private float Counter;
+var private float LastReplicatedAverDT;
+
+var private class<Weapon> WeaponClasses[13];
+var private class<Weapon> NewNetWeaponClasses[13];
+var private bool bDefaultWeaponsChanged;
 
 function PreBeginPlay()
 {
