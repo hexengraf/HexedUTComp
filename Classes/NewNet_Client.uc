@@ -33,6 +33,7 @@ var private NewNet_Client LocalClient;
 var private float PingSendTime;
 var private bool bPingReceived;
 var private int numPings;
+var private bool bInitializeClient;
 
 replication
 {
@@ -55,11 +56,8 @@ simulated event PreBeginPlay()
     Super.PreBeginPlay();
     if (Level.NetMode != NM_DedicatedServer)
     {
-        if (Level.NetMode == NM_Client || Owner == Level.GetLocalPlayerController())
-        {
-            default.LocalClient = Self;
-        }
         class'UTComp_HxMenuPanel'.static.AddToMenu();
+        bInitializeClient = true;
     }
 }
 
@@ -82,15 +80,38 @@ simulated function Pong()
 
 simulated function Tick(float DeltaTime)
 {
-    if (Level.NetMode != NM_Client)
+    if (bInitializeClient)
     {
-        return;
+        InitializeClient();
     }
-    if (bPingReceived && Level.TimeSeconds > PingSendTime + PingTweenTime)
+    if (Level.NetMode == NM_Client)
     {
-        PingSendTime = Level.TimeSeconds;
-        bPingReceived = False;
-        Ping();
+        if (bPingReceived && Level.TimeSeconds > PingSendTime + PingTweenTime)
+        {
+            PingSendTime = Level.TimeSeconds;
+            bPingReceived = False;
+            Ping();
+        }
+    }
+}
+
+simulated function InitializeClient()
+{
+    local PlayerController PC;
+    local NewNet_Client Client;
+
+    PC = Level.GetLocalPlayerController();
+    if (PC != None && (default.LocalClient == None || default.LocalClient.Owner != PC))
+    {
+        ForEach Level.DynamicActors(class'NewNet_Client', Client)
+        {
+            if (Client.Owner == PC)
+            {
+                default.LocalClient = Client;
+                bInitializeClient = false;
+                break;
+            }
+        }
     }
 }
 
