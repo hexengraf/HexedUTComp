@@ -24,8 +24,8 @@ var config bool bEnhancedNetCode;
 var bool bAllowEnhancedNetcode;
 var bool bAllowNewEyeHeightAlgorithm;
 var int TimedOvertime;
-var float PingTweenTime;
-var float PawnCollisionHistoryLength;
+var float TimeBetweenPings;
+var float PawnCollisionTimeWindow;
 
 var float PredictedPing;
 
@@ -41,8 +41,8 @@ replication
         bAllowEnhancedNetcode,
         bAllowNewEyeHeightAlgorithm,
         TimedOvertime,
-        PingTweenTime,
-        PawnCollisionHistoryLength;
+        TimeBetweenPings,
+        PawnCollisionTimeWindow;
 
     reliable if (Role == ROLE_Authority)
         Pong, ClientResetNetcode;
@@ -56,7 +56,7 @@ simulated event PreBeginPlay()
     Super.PreBeginPlay();
     if (Level.NetMode != NM_DedicatedServer)
     {
-        class'UTComp_HxMenuPanel'.static.AddToMenu();
+        // class'UTComp_HxMenuPanel'.static.AddToMenu();
         bInitializeClient = true;
     }
 }
@@ -69,7 +69,7 @@ simulated function Ping()
 simulated function Pong()
 {
     bPingReceived = True;
-    PredictedPing = (2.0 * PredictedPing + (Level.TimeSeconds - PingSendTime)) / PingTweenTime;
+    PredictedPing = (2.0 * PredictedPing + (Level.TimeSeconds - PingSendTime)) / TimeBetweenPings;
     Default.PredictedPing = PredictedPing;
     numPings++;
     if(NumPings < 8)
@@ -86,7 +86,7 @@ simulated function Tick(float DeltaTime)
     }
     if (Level.NetMode == NM_Client)
     {
-        if (bPingReceived && Level.TimeSeconds > PingSendTime + PingTweenTime)
+        if (bPingReceived && Level.TimeSeconds > PingSendTime + TimeBetweenPings)
         {
             PingSendTime = Level.TimeSeconds;
             bPingReceived = False;
@@ -125,24 +125,6 @@ simulated function ClientResetNetcode()
     {
         P.Destroy();
     }
-}
-
-function UpdateAll()
-{
-    local MutUTComp UTComp;
-
-    UTComp = MutUTComp(MutatorOwner);
-    bAllowEnhancedNetcode = UTComp.bAllowEnhancedNetcode;
-    bAllowNewEyeHeightAlgorithm = UTComp.bAllowNewEyeHeightAlgorithm;
-    TimedOvertime = UTComp.TimedOvertime;
-    PingTweenTime = UTComp.PingTweenTime;
-    PawnCollisionHistoryLength = UTComp.PawnCollisionHistoryLength;
-    NetUpdateTime = Level.TimeSeconds - 1;
-}
-
-function UpdateProperty(string PropertyName, String PropertyValue)
-{
-    UpdateAll();
 }
 
 function TurnOffNetCode()
@@ -199,12 +181,68 @@ function TurnOffNetCode()
     }
 }
 
-static function SetEnhancedNetCode(coerce bool bEnable)
+simulated function string GetProperty(int Index)
 {
-    if (!bEnable && default.LocalClient != None)
+    if (Index == 0)
     {
-        default.LocalClient.TurnOffNetCode();
+        return string(bEnhancedNetCode);
     }
+    if (Index >= Properties.Length)
+    {
+        return "";
+    }
+    switch (Index)
+    {
+        case 1:
+            return string(class'UTComp_xPawn'.default.bNewEyeHeightAlgorithm);
+        case 2:
+            return string(class'UTComp_xPawn'.default.bViewSmoothing);
+    }
+    return "";
+}
+
+simulated function SetProperty(int Index, string Value)
+{
+    local PlayerController PC;
+    local UTComp_xPawn Pawn;
+
+    if (Index == 0)
+    {
+        SetEnhancedNetCode(Value);
+    }
+    else if (Index < Properties.Length)
+    {
+        switch (Index)
+        {
+            case 1:
+                class'UTComp_xPawn'.default.bNewEyeHeightAlgorithm = bool(Value);
+                break;
+            case 2:
+                class'UTComp_xPawn'.default.bViewSmoothing = bool(Value);
+                break;
+        }
+        PC = PlayerController(Owner);
+        if (PC != None)
+        {
+            Pawn = UTComp_xPawn(PC.Pawn);
+            if (Pawn != None)
+            {
+                Pawn.bNewEyeHeightAlgorithm = class'UTComp_xPawn'.default.bNewEyeHeightAlgorithm;
+                Pawn.bViewSmoothing = class'UTComp_xPawn'.default.bViewSmoothing;
+            }
+
+        }
+        class'UTComp_xPawn'.static.StaticSaveConfig();
+    }
+}
+
+function SetEnhancedNetCode(coerce bool bEnable)
+{
+    if (!bEnable)
+    {
+        TurnOffNetCode();
+    }
+    bEnhancedNetCode = bEnable;
     default.bEnhancedNetCode = bEnable;
     StaticSaveConfig();
 }
@@ -225,7 +263,12 @@ defaultproperties
 {
     NetUpdateFrequency=10
     NetPriority=5
-    PingTweenTime=3.0
+    TimeBetweenPings=3.0
     bPingReceived=True
     bEnhancedNetCode=True
+
+    MutatorClass=class'MutUTComp'
+    Properties(0)=(Name="bEnhancedNetCode",Section="Enhanced Netcode",Caption="Enable Enhanced Netcode",Hint="Enable enhanced netcode on weapons.",Type=PIT_Check,Dependency="bAllowEnhancedNetcode")
+    Properties(1)=(Name="bNewEyeHeightAlgorithm",Section="EyeHeight Algorithm",Caption="Enable New EyeHeight Algorithm",Hint="Enable new EyeHeight algorithm to fix aim offset while moving on slopes.",Type=PIT_Check,Dependency="bAllowNewEyeHeightAlgorithm")
+    Properties(2)=(Name="bViewSmoothing",Section="EyeHeight Algorithm",Caption="View Smoothing",Hint="Smooth the view when using new EyeHeight algorithm",Type=PIT_Check,Dependency="bAllowNewEyeHeightAlgorithm",bAdvanced=true)
 }

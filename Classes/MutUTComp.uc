@@ -7,8 +7,8 @@ const AVERDT_SEND_PERIOD = 4.00;
 var config bool bAllowEnhancedNetcode;
 var config bool bAllowNewEyeHeightAlgorithm;
 var config int TimedOvertime;
-var config float PingTweenTime;
-var config float PawnCollisionHistoryLength;
+var config float TimeBetweenPings;
+var config float PawnCollisionTimeWindow;
 
 var PawnCollisionCopy PCC;
 var float ClientTimeStamp;
@@ -410,26 +410,26 @@ simulated function Reset()
 
 defaultproperties
 {
-    FriendlyName="HexedUTComp v5"
+    FriendlyName="HexedUTComp v6dev"
     Description="Cutdown version of UTComp providing new eye height algorithm, enhanced netcode, and timed overtime."
     bAlwaysRelevant=True
     RemoteRole=ROLE_SimulatedProxy
     bAddToServerPackages=True
+
     MutatorGroup="HexedUTComp"
     CRIClass=class'NewNet_Client'
-
-    PropertyInfoEntries(0)=(Name="bAllowEnhancedNetcode",Caption="Allow NewNet Weapons",Hint="Allow clients to enable/disable the NewNet Weapons.",PIType="Check",bMultiplayerOnly=true,bAdvanced=true)
-    PropertyInfoEntries(1)=(Name="bAllowNewEyeHeightAlgorithm",Caption="Allow new EyeHeight algorithm",Hint="Allow clients to enable/disable the new EyeHeight algorithm.",PIType="Check")
-    PropertyInfoEntries(2)=(Name="TimedOvertime",Caption="Timed overtime duration",PIType="Text",Hint="Duration of timed overtime (in seconds).",PIExtras="0;0:3600")
-    PropertyInfoEntries(3)=(Name="PingTweenTime",Caption="Ping Tween Time",Hint="NewNet Ping Tween Time (3.0).",PIType="Text",PIExtras="0;0.0:1000",bMultiplayerOnly=true,bAdvanced=true)
-    PropertyInfoEntries(4)=(Name="PawnCollisionHistoryLength",Caption="Pawn Collision History Length",Hint="NewNet Pawn Collision History Length (0.35).",PIType="Text",PIExtras="0;0.0:1000",bMultiplayerOnly=true,bAdvanced=true)
+    Properties(0)=(Name="bAllowEnhancedNetcode",Section="Enhanced Netcode",Caption="Allow enhanced netcode",Hint="Allow clients to enable/disable the enhanced netcode.",Type="Check",bMPOnly=true,bAdvanced=true)
+    Properties(1)=(Name="TimeBetweenPings",Section="Enhanced Netcode",Caption="Time between pings",Hint="Time to wait between pings (in seconds).",Type="Text",Data="4;0.0:360.0",bMPOnly=true,bAdvanced=true)
+    Properties(2)=(Name="PawnCollisionTimeWindow",Section="Enhanced Netcode",Caption="Pawn collision time window",Hint="Time window (in seconds) to look back for pawn collisions.",Type="Text",Data="4;0.0:360.0",bMPOnly=true,bAdvanced=true)
+    Properties(3)=(Name="bAllowNewEyeHeightAlgorithm",Section="EyeHeight Algorithm",Caption="Allow new EyeHeight algorithm",Hint="Allow clients to enable/disable the new EyeHeight algorithm.",Type="Check",bMPOnly=true)
+    Properties(4)=(Name="TimedOvertime",Section="Miscellaneous",Caption="Timed overtime duration",Type="Text",Hint="Duration of timed overtime (in seconds).",Data="4;0:3600")
 
     // configs
     bAllowEnhancedNetcode=True
     bAllowNewEyeHeightAlgorithm=True
+    TimeBetweenPings=3.0
+    PawnCollisionTimeWindow=0.35
     TimedOvertime=0
-    PingTweenTime=3.0
-    PawnCollisionHistoryLength=0.35
     //original weapons
     WeaponClasses(0)=class'ShockRifle'
     WeaponClasses(1)=class'LinkGun'

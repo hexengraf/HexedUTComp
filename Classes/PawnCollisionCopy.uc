@@ -49,7 +49,7 @@ function PostBeginPlay()
 
     if(M != None)
     {
-        MAX_HISTORY_LENGTH = M.PawnCollisionHistoryLength;
+        MAX_HISTORY_LENGTH = M.PawnCollisionTimeWindow;
     }
 }
 
