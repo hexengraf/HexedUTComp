@@ -21,44 +21,22 @@ class NewNet_Client extends HxClientReplicationInfo
 
 var config bool bEnhancedNetCode;
 
-var bool bAllowEnhancedNetcode;
-var bool bAllowNewEyeHeightAlgorithm;
-var int TimedOvertime;
 var float TimeBetweenPings;
-var float PawnCollisionTimeWindow;
-
 var float PredictedPing;
 
-var private NewNet_Client LocalClient;
 var private float PingSendTime;
 var private bool bPingReceived;
 var private int numPings;
-var private bool bInitializeClient;
 
 replication
 {
     reliable if (Role == ROLE_Authority)
-        bAllowEnhancedNetcode,
-        bAllowNewEyeHeightAlgorithm,
-        TimedOvertime,
-        TimeBetweenPings,
-        PawnCollisionTimeWindow;
-
-    reliable if (Role == ROLE_Authority)
-        Pong, ClientResetNetcode;
+        Pong,
+        ClientResetNetcode;
 
     reliable if (Role < ROLE_Authority)
-        Ping, TurnOffNetCode;
-}
-
-simulated event PreBeginPlay()
-{
-    Super.PreBeginPlay();
-    if (Level.NetMode != NM_DedicatedServer)
-    {
-        // class'UTComp_HxMenuPanel'.static.AddToMenu();
-        bInitializeClient = true;
-    }
+        Ping,
+        TurnOffNetcode;
 }
 
 simulated function Ping()
@@ -80,10 +58,6 @@ simulated function Pong()
 
 simulated function Tick(float DeltaTime)
 {
-    if (bInitializeClient)
-    {
-        InitializeClient();
-    }
     if (Level.NetMode == NM_Client)
     {
         if (bPingReceived && Level.TimeSeconds > PingSendTime + TimeBetweenPings)
@@ -91,26 +65,6 @@ simulated function Tick(float DeltaTime)
             PingSendTime = Level.TimeSeconds;
             bPingReceived = False;
             Ping();
-        }
-    }
-}
-
-simulated function InitializeClient()
-{
-    local PlayerController PC;
-    local NewNet_Client Client;
-
-    PC = Level.GetLocalPlayerController();
-    if (PC != None && (default.LocalClient == None || default.LocalClient.Owner != PC))
-    {
-        ForEach Level.DynamicActors(class'NewNet_Client', Client)
-        {
-            if (Client.Owner == PC)
-            {
-                default.LocalClient = Client;
-                bInitializeClient = false;
-                break;
-            }
         }
     }
 }
@@ -127,7 +81,7 @@ simulated function ClientResetNetcode()
     }
 }
 
-function TurnOffNetCode()
+function TurnOffNetcode()
 {
     local PlayerController PC;
     local inventory Inv;
@@ -181,18 +135,22 @@ function TurnOffNetCode()
     }
 }
 
+simulated function ServerInfoReady()
+{
+    TimeBetweenPings = float(GetServerProperty("TimeBetweenPings"));
+}
+
+simulated function ServerPropertyChanged(int Index, string OldValue)
+{
+    TimeBetweenPings = float(GetServerProperty("TimeBetweenPings"));
+}
+
 simulated function string GetProperty(int Index)
 {
-    if (Index == 0)
-    {
-        return string(bEnhancedNetCode);
-    }
-    if (Index >= Properties.Length)
-    {
-        return "";
-    }
     switch (Index)
     {
+        case 0:
+            return string(bEnhancedNetCode);
         case 1:
             return string(class'UTComp_xPawn'.default.bNewEyeHeightAlgorithm);
         case 2:
@@ -225,12 +183,11 @@ simulated function SetProperty(int Index, string Value)
         if (PC != None)
         {
             Pawn = UTComp_xPawn(PC.Pawn);
-            if (Pawn != None)
-            {
-                Pawn.bNewEyeHeightAlgorithm = class'UTComp_xPawn'.default.bNewEyeHeightAlgorithm;
-                Pawn.bViewSmoothing = class'UTComp_xPawn'.default.bViewSmoothing;
-            }
-
+        }
+        if (Pawn != None)
+        {
+            Pawn.bNewEyeHeightAlgorithm = class'UTComp_xPawn'.default.bNewEyeHeightAlgorithm;
+            Pawn.bViewSmoothing = class'UTComp_xPawn'.default.bViewSmoothing;
         }
         class'UTComp_xPawn'.static.StaticSaveConfig();
     }
@@ -240,23 +197,16 @@ function SetEnhancedNetCode(coerce bool bEnable)
 {
     if (!bEnable)
     {
-        TurnOffNetCode();
+        TurnOffNetcode();
     }
     bEnhancedNetCode = bEnable;
     default.bEnhancedNetCode = bEnable;
     StaticSaveConfig();
 }
 
-static function NewNet_Client GetClient()
-{
-    return default.LocalClient;
-}
-
 static function bool IsEnhancedNetcodeEnabled()
 {
-    return default.bEnhancedNetCode
-        && default.LocalClient != None
-        && default.LocalClient.bAllowEnhancedNetcode;
+    return default.bEnhancedNetCode;
 }
 
 defaultproperties
