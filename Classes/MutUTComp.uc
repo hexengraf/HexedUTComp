@@ -12,14 +12,14 @@ var PawnCollisionCopy PCC;
 var float ClientTimeStamp;
 var float AverDT;
 
+var const private class<Weapon> WeaponClasses[13];
+var const private class<Weapon> NewNetWeaponClasses[13];
+
 var private TimeStamp_Pawn CounterPawn;
 var private TimeStamp StampInfo;
 var private float StampArray[256];
 var private float Counter;
 var private float LastReplicatedAverDT;
-
-var private class<Weapon> WeaponClasses[13];
-var private class<Weapon> NewNetWeaponClasses[13];
 var private bool bEnhancedNetcodeActive;
 var private bool bPawnClassReplaced;
 var private bool bDefaultWeaponsChanged;
@@ -40,13 +40,13 @@ function SetupNewEyeHeightAlgorithm()
     {
         if (Level.Game.DefaultPlayerClassName ~= "xGame.xPawn")
         {
-            Level.Game.DefaultPlayerClassName = String(class'UTComp_xPawn');
-            bPawnClassReplaced = True;
+            Level.Game.DefaultPlayerClassName = string(class'UTComp_xPawn');
+            bPawnClassReplaced = true;
         }
         else
         {
             Warn(Name@"failed to replace xPawn class, disabling new eye height algorithm.");
-            bAllowNewEyeHeightAlgorithm = False;
+            bAllowNewEyeHeightAlgorithm = false;
         }
     }
 }
@@ -58,7 +58,7 @@ function SetupEnhancedNetcode()
         StampInfo = Spawn(class'TimeStamp', Self);
         CounterPawn = Spawn(class'TimeStamp_Pawn', Self);
         SetupInstagib();
-        bEnhancedNetcodeActive = True;
+        bEnhancedNetcodeActive = true;
     }
 }
 
@@ -71,11 +71,11 @@ function SetupInstagib()
     if (Instagib != None)
     {
         Instagib.Default.WeaponName = 'NewNet_SuperShockRifle';
-        Instagib.Default.WeaponString = String(class'NewNet_SuperShockRifle');
-        Instagib.Default.DefaultWeaponName = String(class'NewNet_SuperShockRifle');
+        Instagib.Default.WeaponString = string(class'NewNet_SuperShockRifle');
+        Instagib.Default.DefaultWeaponName = string(class'NewNet_SuperShockRifle');
         Instagib.WeaponName = 'NewNet_SuperShockRifle';
-        Instagib.WeaponString = String(class'NewNet_SuperShockRifle');
-        Instagib.DefaultWeaponName = String(class'NewNet_SuperShockRifle');
+        Instagib.WeaponString = string(class'NewNet_SuperShockRifle');
+        Instagib.DefaultWeaponName = string(class'NewNet_SuperShockRifle');
     }
 }
 
@@ -177,19 +177,19 @@ static function bool IsPredicted(Actor A)
 function ReplaceOtherMutatorWeapons()
 {
     local Mutator M;
-    local int x;
+    local int i;
 
-    bDefaultWeaponsChanged = True;
+    bDefaultWeaponsChanged = true;
     // replace DefaultWeaponName (fix for simple Arena mutators)
-    for(M = Level.Game.BaseMutator; M != None; M = M.NextMutator)
+    for (M = Level.Game.BaseMutator; M != None; M = M.NextMutator)
     {
         if (M.DefaultWeaponName != "")
         {
-            for (x = 0; x < ArrayCount(WeaponClasses); x++)
+            for (i = 0; i < ArrayCount(WeaponClasses); ++i)
             {
-                if (M.DefaultWeaponName ~= String(WeaponClasses[x]))
+                if (M.DefaultWeaponName ~= string(WeaponClasses[i]))
                 {
-                    M.DefaultWeaponName = String(NewNetWeaponClasses[x]);
+                    M.DefaultWeaponName = string(NewNetWeaponClasses[i]);
                 }
             }
         }
@@ -208,8 +208,7 @@ function Tick(float DeltaTime)
         Counter += 1;
         StampArray[Counter % 256] = ClientTimeStamp;
         AverDT = (9.0 * AverDT + DeltaTime) * 0.1;
-        SetPawnStamp();
-
+        CounterPawn.UpdateCounter(Counter);
         if (ClientTimeStamp > LastReplicatedAverDT + AVERDT_SEND_PERIOD)
         {
             StampInfo.ReplicatedAverDT(AverDT);
@@ -218,59 +217,49 @@ function Tick(float DeltaTime)
     }
 }
 
-// why are we using a Pawn and rotation to replicate a simple int counter?
-function SetPawnStamp()
+function float GetStamp(int Stamp)
 {
-    local rotator R;
-
-    R.Yaw = (Counter % 256) * 256;
-    R.Pitch = int(Counter / 256) * 256;
-    CounterPawn.SetRotation(R);
-}
-
-function float GetStamp(int stamp)
-{
-   return StampArray[stamp % 256];
+   return StampArray[Stamp % 256];
 }
 
 function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
 {
     local WeaponLocker L;
-    local int x;
     local int i;
+    local int j;
 
     if (bEnhancedNetcodeActive)
     {
         if (xWeaponBase(Other) != None)
         {
-            for (x = 0; x < ArrayCount(WeaponClasses); x++)
+            for (i = 0; i < ArrayCount(WeaponClasses); ++i)
             {
-                if (xWeaponBase(Other).WeaponType == WeaponClasses[x])
+                if (xWeaponBase(Other).WeaponType == WeaponClasses[i])
                 {
-                    xWeaponBase(Other).WeaponType = NewNetWeaponClasses[x];
+                    xWeaponBase(Other).WeaponType = NewNetWeaponClasses[i];
                 }
             }
         }
         else if (WeaponPickup(Other) != None)
         {
-            for (x = 0; x < ArrayCount(WeaponClasses); ++x)
+            for (i = 0; i < ArrayCount(WeaponClasses); ++i)
             {
-                if (WeaponPickup(Other).InventoryType == WeaponClasses[x])
+                if (WeaponPickup(Other).InventoryType == WeaponClasses[i])
                 {
-                    WeaponPickup(Other).InventoryType = NewNetWeaponClasses[x];
+                    WeaponPickup(Other).InventoryType = NewNetWeaponClasses[i];
                 }
             }
         }
         else if (WeaponLocker(Other) != None)
         {
             L = WeaponLocker(Other);
-            for (x = 0; x < ArrayCount(WeaponClasses); x++)
+            for (i = 0; i < ArrayCount(WeaponClasses); ++i)
             {
-                for (i = 0; i < L.Weapons.Length; i++)
+                for (j = 0; j < L.Weapons.Length; ++j)
                 {
-                    if (L.Weapons[i].WeaponClass == WeaponClasses[x])
+                    if (L.Weapons[j].WeaponClass == WeaponClasses[i])
                     {
-                        L.Weapons[i].WeaponClass = NewNetWeaponClasses[x];
+                        L.Weapons[j].WeaponClass = NewNetWeaponClasses[i];
                     }
                 }
             }
@@ -279,26 +268,19 @@ function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
     return Super.CheckReplacement(Other, bSuperRelevant);
 }
 
-function String GetInventoryClassOverride(String InventoryClassName)
+function string GetInventoryClassOverride(string InventoryClassName)
 {
-    local String OverrideClassName;
-    local int x;
+    local int i;
 
-    OverrideClassName = InventoryClassName;
-
-    if (NextMutator != None)
+    InventoryClassName = Super.GetInventoryClassOverride(InventoryClassName);
+    for (i = 0; i < ArrayCount(WeaponClasses); ++i)
     {
-        OverrideClassName = NextMutator.GetInventoryClassOverride(InventoryClassName);
-    }
-    for (x = 0; x < ArrayCount(WeaponClasses); ++x)
-    {
-        if (OverrideClassName ~= String(WeaponClasses[x]))
+        if (InventoryClassName ~= string(WeaponClasses[i]))
         {
-            OverrideClassName = String(NewNetWeaponClasses[x]);
-            break;
+            return string(NewNetWeaponClasses[i]);
         }
     }
-    return OverrideClassName;
+    return InventoryClassName;
 }
 
 function GetServerDetails(out GameInfo.ServerResponseLine ServerState)
@@ -320,7 +302,7 @@ defaultproperties
 {
     FriendlyName="HexedUTComp v6dev"
     Description="Cutdown version of UTComp providing new eye height algorithm, enhanced netcode, and timed overtime."
-    bAddToServerPackages=True
+    bAddToServerPackages=true
 
     MutatorGroup="HexedUTComp"
     CRIClass=class'NewNet_Client'
@@ -331,8 +313,8 @@ defaultproperties
     Properties(4)=(Name="TimedOvertime",Section="Miscellaneous",Caption="Timed overtime duration",Type="Text",Hint="Duration of timed overtime (in seconds).",Data="4;0:3600")
 
     // configs
-    bAllowEnhancedNetcode=True
-    bAllowNewEyeHeightAlgorithm=True
+    bAllowEnhancedNetcode=true
+    bAllowNewEyeHeightAlgorithm=true
     TimeBetweenPings=3.0
     PawnCollisionTimeWindow=0.35
     TimedOvertime=0

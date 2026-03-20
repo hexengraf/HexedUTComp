@@ -1,19 +1,31 @@
 class TimeStamp_Pawn extends Pawn;
 
 var int Timestamp;
-var int NewTimestamp;
 var float DT;
+
+var private int Counter;
 
 simulated event Tick(float DeltaTime)
 {
    Super.Tick(DeltaTime);
-   NewTimestamp = (Rotation.Yaw + Rotation.Pitch * 256) / 256;
+   Counter = (Rotation.Yaw + Rotation.Pitch * 256) / 256;
    DT += DeltaTime;
-   if(NewTimestamp > Timestamp || Timestamp - NewTimestamp > 5000)
+   if (Counter > Timestamp || Timestamp - Counter > 5000)
    {
-       Timestamp = NewTimestamp;
+       Timestamp = Counter;
        DT = 0.00;
    }
+}
+
+// TODO: evaluate if it is worth using rotation (to use native replication)
+// instead of declaring a replicated counter
+function UpdateCounter(float NewCounter)
+{
+    local rotator R;
+
+    R.Yaw = (NewCounter % 256) * 256;
+    R.Pitch = int(NewCounter / 256) * 256;
+    SetRotation(R);
 }
 
 function Reset()
@@ -38,4 +50,5 @@ DefaultProperties
     bDisturbFluidSurface=false
     Physics=Phys_None
     bStasis=false
+    bHidden=true
 }
