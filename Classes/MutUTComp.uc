@@ -1,7 +1,5 @@
 class MutUTComp extends HxMutator;
 
-#exec AUDIO IMPORT FILE=Sounds\HitSound.wav
-
 const AVERDT_SEND_PERIOD = 4.00;
 
 var config bool bAllowEnhancedNetcode;
@@ -23,49 +21,49 @@ var private float LastReplicatedAverDT;
 
 var private class<Weapon> WeaponClasses[13];
 var private class<Weapon> NewNetWeaponClasses[13];
+var private bool bEnhancedNetcodeActive;
+var private bool bPawnClassReplaced;
 var private bool bDefaultWeaponsChanged;
 
-function PreBeginPlay()
+event PreBeginPlay()
 {
     Super.PreBeginPlay();
-    if (bAllowEnhancedNetcode || bAllowNewEyeHeightAlgorithm)
+    if (Level.NetMode != NM_Standalone)
     {
-        ReplacePawn();
+        SetupNewEyeHeightAlgorithm();
+        SetupEnhancedNetcode();
     }
+}
+
+function SetupNewEyeHeightAlgorithm()
+{
+    if (bAllowNewEyeHeightAlgorithm)
+    {
+        if (Level.Game.DefaultPlayerClassName ~= "xGame.xPawn")
+        {
+            Level.Game.DefaultPlayerClassName = String(class'UTComp_xPawn');
+            bPawnClassReplaced = True;
+        }
+        else
+        {
+            Warn(Name@"failed to replace xPawn class, disabling new eye height algorithm.");
+            bAllowNewEyeHeightAlgorithm = False;
+        }
+    }
+}
+
+function SetupEnhancedNetcode()
+{
     if (bAllowEnhancedNetcode)
     {
-        SetupTimeStamps();
-        SetupInstagib();
-    }
-    StaticSaveConfig();
-}
-
-function ReplacePawn()
-{
-    if (Level.Game.DefaultPlayerClassName ~= "xGame.xPawn")
-    {
-        Level.Game.DefaultPlayerClassName = String(class'UTComp_xPawn');
-    }
-    else
-    {
-        Warn(Name@"failed to replace xPawn class, disabling new eye height algorithm.");
-        bAllowNewEyeHeightAlgorithm = False;
-    }
-}
-
-function SetupTimeStamps()
-{
-    if (StampInfo == None)
-    {
         StampInfo = Spawn(class'TimeStamp');
-    }
-    if (CounterController == None)
-    {
         CounterController = Spawn(class'TimeStamp_Controller');
-    }
-    if (CounterController != None && CounterController.Pawn == None)
-    {
-        CounterController.Possess(Spawn(CounterController.PawnClass));
+        if (CounterController.Pawn == None)
+        {
+            CounterController.Possess(Spawn(CounterController.PawnClass));
+        }
+        SetupInstagib();
+        bEnhancedNetcodeActive = True;
     }
 }
 
@@ -106,10 +104,9 @@ event PostBeginPlay()
 
 function ModifyPlayer(Pawn Other)
 {
-    if (bAllowEnhancedNetcode)
+    if (bEnhancedNetcodeActive)
     {
         SpawnCollisionCopy(Other);
-        RemoveOldPawns();
     }
     if (UTComp_xPawn(Other) != None)
     {
@@ -120,7 +117,7 @@ function ModifyPlayer(Pawn Other)
 
 function SpawnCollisionCopy(Pawn Other)
 {
-    if(PCC == None)
+    if (PCC == None)
     {
         PCC = Spawn(class'PawnCollisionCopy');
         PCC.SetPawn(Other);
@@ -129,16 +126,13 @@ function SpawnCollisionCopy(Pawn Other)
     {
         PCC.AddPawnToList(Other);
     }
-}
-
-function RemoveOldPawns()
-{
     PCC = PCC.RemoveOldPawns();
 }
 
 function DriverEnteredVehicle(Vehicle V, Pawn P)
 {
     local PawnCollisionCopy C;
+
     C = PCC;
     while (C != None)
     {
@@ -149,10 +143,7 @@ function DriverEnteredVehicle(Vehicle V, Pawn P)
         }
         C = C.Next;
     }
-    if (NextMutator != None)
-    {
-        NextMutator.DriverEnteredVehicle(V, P);
-    }
+    Super.DriverEnteredVehicle(V, P);
 }
 
 function DriverLeftVehicle(Vehicle V, Pawn P)
@@ -169,10 +160,7 @@ function DriverLeftVehicle(Vehicle V, Pawn P)
         }
         C = C.Next;
     }
-    if (NextMutator != None)
-    {
-        NextMutator.DriverLeftVehicle(V, P);
-    }
+    Super.DriverLeftVehicle(V, P);
 }
 
 function ListPawns()
@@ -215,11 +203,18 @@ function ReplaceOtherMutatorWeapons()
 
 simulated function Tick(float DeltaTime)
 {
-    if (bAllowEnhancedNetcode)
+    if (bEnhancedNetcodeActive)
     {
-        if (Level.NetMode == NM_DedicatedServer || Level.NetMode == NM_ListenServer)
+        if (Level.NetMode == NM_Client)
         {
-            if (bDefaultWeaponsChanged == False)
+            if (FPM == None)
+            {
+                FPM = Spawn(Class'FakeProjectileManager');
+            }
+        }
+        else
+        {
+            if (!bDefaultWeaponsChanged)
             {
                 ReplaceOtherMutatorWeapons();
             }
@@ -234,10 +229,6 @@ simulated function Tick(float DeltaTime)
                 StampInfo.ReplicatedAverDT(AverDT);
                 LastReplicatedAverDT = ClientTimeStamp;
             }
-        }
-        else if (FPM == None && Level.NetMode == NM_Client)
-        {
-            FPM = Spawn(Class'FakeProjectileManager');
         }
     }
 }
@@ -264,10 +255,11 @@ simulated function float GetStamp(int stamp)
 
 function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
 {
-    local int x, i;
     local WeaponLocker L;
+    local int x;
+    local int i;
 
-    if (bAllowEnhancedNetcode)
+    if (bEnhancedNetcodeActive)
     {
         if (xWeaponBase(Other) != None)
         {
@@ -333,30 +325,15 @@ function GetServerDetails(out GameInfo.ServerResponseLine ServerState)
 {
     local int i;
 
-    super.GetServerDetails(ServerState);
-
+    Super.GetServerDetails(ServerState);
     i = ServerState.ServerInfo.Length;
     ServerState.ServerInfo.Length = i + 1;
-    ServerState.ServerInfo[i].Key = "NewNet Weapons";
-    if (bAllowEnhancedNetcode)
-    {
-        ServerState.ServerInfo[i++].Value = "Allowed";
-    }
-    else
-    {
-        ServerState.ServerInfo[i++].Value = "Disabled";
-    }
+    ServerState.ServerInfo[i].Key = "Enhanced netcode";
+    ServerState.ServerInfo[i++].Value = Eval(bEnhancedNetcodeActive, "Enabled", "Disabled");
     i = ServerState.ServerInfo.Length;
     ServerState.ServerInfo.Length = i + 1;
     ServerState.ServerInfo[i].Key = "New EyeHeight algorithm";
-    if (bAllowNewEyeHeightAlgorithm)
-    {
-        ServerState.ServerInfo[i++].Value = "Allowed";
-    }
-    else
-    {
-        ServerState.ServerInfo[i++].Value = "Disabled";
-    }
+    ServerState.ServerInfo[i++].Value = Eval(bPawnClassReplaced, "Enabled", "Disabled");
 }
 
 /*
