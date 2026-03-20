@@ -1,43 +1,30 @@
-//-----------------------------------------------------------
-//
-//-----------------------------------------------------------
 class TimeStamp_Pawn extends Pawn;
 
-var int timestamp;
-var int NewTimeStamp;
-var float dt;
+var int Timestamp;
+var int NewTimestamp;
+var float DT;
 
-function prebeginplay()
+simulated event Tick(float DeltaTime)
 {
-    super.prebeginplay();
-}
-
-function PossessedBy(Controller C)
-{
-   Super.PossessedBy(C);
-   NetPriority=default.NetPriority;
-}
-function destroyed()
-{
-   super.destroyed();
-
-}
-
-simulated event tick(float deltatime)
-{
-   Super.tick(deltatime);
-   NewTimeStamp = (Rotation.Yaw+Rotation.Pitch*256)/256;
-   DT+=deltatime;
-   if(NewTimeStamp > TimeStamp || TimeStamp-NewTimeStamp > 5000)
+   Super.Tick(DeltaTime);
+   NewTimestamp = (Rotation.Yaw + Rotation.Pitch * 256) / 256;
+   DT += DeltaTime;
+   if(NewTimestamp > Timestamp || Timestamp - NewTimestamp > 5000)
    {
-       TimeStamp=NewTimeStamp;
-       DT=0.00;
+       Timestamp = NewTimestamp;
+       DT = 0.00;
    }
+}
+
+function Reset()
+{
+    // skip Pawn.Reset() to prevent self-destroy
+    Super(Actor).Reset();
 }
 
 DefaultProperties
 {
-    ControllerClass = class'TimeStamp_Controller'
+    ControllerClass=None
     bAlwaysRelevant=true
     NetPriority=50
     bCollideActors=false
@@ -50,6 +37,5 @@ DefaultProperties
     bBlockPlayers=false
     bDisturbFluidSurface=false
     Physics=Phys_None
-
-    bstasis=false
+    bStasis=false
 }

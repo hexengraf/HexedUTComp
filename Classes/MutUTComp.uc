@@ -12,8 +12,7 @@ var PawnCollisionCopy PCC;
 var float ClientTimeStamp;
 var float AverDT;
 
-var private Controller CounterController;
-var private FakeProjectileManager FPM;
+var private TimeStamp_Pawn CounterPawn;
 var private TimeStamp StampInfo;
 var private float StampArray[256];
 var private float Counter;
@@ -56,12 +55,8 @@ function SetupEnhancedNetcode()
 {
     if (bAllowEnhancedNetcode)
     {
-        StampInfo = Spawn(class'TimeStamp');
-        CounterController = Spawn(class'TimeStamp_Controller');
-        if (CounterController.Pawn == None)
-        {
-            CounterController.Possess(Spawn(CounterController.PawnClass));
-        }
+        StampInfo = Spawn(class'TimeStamp', Self);
+        CounterPawn = Spawn(class'TimeStamp_Pawn', Self);
         SetupInstagib();
         bEnhancedNetcodeActive = True;
     }
@@ -201,54 +196,39 @@ function ReplaceOtherMutatorWeapons()
     }
 }
 
-simulated function Tick(float DeltaTime)
+function Tick(float DeltaTime)
 {
     if (bEnhancedNetcodeActive)
     {
-        if (Level.NetMode == NM_Client)
+        if (!bDefaultWeaponsChanged)
         {
-            if (FPM == None)
-            {
-                FPM = Spawn(Class'FakeProjectileManager');
-            }
+            ReplaceOtherMutatorWeapons();
         }
-        else
-        {
-            if (!bDefaultWeaponsChanged)
-            {
-                ReplaceOtherMutatorWeapons();
-            }
-            ClientTimeStamp += DeltaTime;
-            Counter += 1;
-            StampArray[Counter % 256] = ClientTimeStamp;
-            AverDT = (9.0 * AverDT + DeltaTime) * 0.1;
-            SetPawnStamp();
+        ClientTimeStamp += DeltaTime;
+        Counter += 1;
+        StampArray[Counter % 256] = ClientTimeStamp;
+        AverDT = (9.0 * AverDT + DeltaTime) * 0.1;
+        SetPawnStamp();
 
-            if (ClientTimeStamp > LastReplicatedAverDT + AVERDT_SEND_PERIOD)
-            {
-                StampInfo.ReplicatedAverDT(AverDT);
-                LastReplicatedAverDT = ClientTimeStamp;
-            }
+        if (ClientTimeStamp > LastReplicatedAverDT + AVERDT_SEND_PERIOD)
+        {
+            StampInfo.ReplicatedAverDT(AverDT);
+            LastReplicatedAverDT = ClientTimeStamp;
         }
     }
 }
 
+// why are we using a Pawn and rotation to replicate a simple int counter?
 function SetPawnStamp()
 {
     local rotator R;
-    local int i;
 
     R.Yaw = (Counter % 256) * 256;
-    i = Counter / 256;
-    R.Pitch = i * 256;
-
-    if (CounterController.Pawn != None)
-    {
-        CounterController.Pawn.SetRotation(R);
-    }
+    R.Pitch = int(Counter / 256) * 256;
+    CounterPawn.SetRotation(R);
 }
 
-simulated function float GetStamp(int stamp)
+function float GetStamp(int stamp)
 {
    return StampArray[stamp % 256];
 }
@@ -336,61 +316,10 @@ function GetServerDetails(out GameInfo.ServerResponseLine ServerState)
     ServerState.ServerInfo[i++].Value = Eval(bPawnClassReplaced, "Enabled", "Disabled");
 }
 
-/*
- fix for netcode not working in second round in assault and ons game modes
- reset is called bewteen rounds, clean up timestamp pawn and controller and recreate
- ONS and AS round end code calls
-
-    for(C = Level.ControllerList;C != None; C = C.NextController)
-    {
-        ...
-        C.RoundHasEnded();
-    }
-
-   RoundHasEnded in Timestamp_Controller breaks the timestamp mechanism.
-
-   For whatever reason (engine bug?) we cannot override RoundHasEnded() function in
-   Timestamp_Controller.  It never gets called, instead the base method gets called
-   which unpossesses the pawn and destroys itself.  Not good.  Since we can't override
-   RoundHasEnded, we fix what gets broken in the Reset() function that gets called for
-   all actors (including this mutator) during round changes.
-*/
-simulated function Reset()
-{
-    local int i;
-
-    if (Level.NetMode != NM_Client)
-    {
-        // remove all Timestamp_pawn from clients
-        for (i = 0; i < CRIs.Length; ++i)
-        {
-            if(NewNet_Client(CRIs[i]) != None)
-            {
-                NewNet_Client(CRIs[i]).ClientResetNetcode();
-            }
-        }
-        // delete these server side, the get recreated in SetPawnStamp function
-        if(CounterController != None)
-        {
-            if(CounterController.Pawn != None)
-            {
-                CounterController.Pawn.Unpossessed();
-                CounterController.Pawn.Destroy();
-                CounterController.Pawn = None;
-            }
-
-            CounterController.Destroy();
-            CounterController = None;
-        }
-    }
-}
-
 defaultproperties
 {
     FriendlyName="HexedUTComp v6dev"
     Description="Cutdown version of UTComp providing new eye height algorithm, enhanced netcode, and timed overtime."
-    bAlwaysRelevant=True
-    RemoteRole=ROLE_SimulatedProxy
     bAddToServerPackages=True
 
     MutatorGroup="HexedUTComp"

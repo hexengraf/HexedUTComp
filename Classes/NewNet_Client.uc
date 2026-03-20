@@ -24,6 +24,7 @@ var config bool bEnhancedNetCode;
 var float TimeBetweenPings;
 var float PredictedPing;
 
+var private FakeProjectileManager FPM;
 var private float PingSendTime;
 var private bool bPingReceived;
 var private int numPings;
@@ -31,8 +32,7 @@ var private int numPings;
 replication
 {
     reliable if (Role == ROLE_Authority)
-        Pong,
-        ClientResetNetcode;
+        Pong;
 
     reliable if (Role < ROLE_Authority)
         Ping,
@@ -58,6 +58,7 @@ simulated function Pong()
 
 simulated function Tick(float DeltaTime)
 {
+    Super.Tick(DeltaTime);
     if (Level.NetMode == NM_Client)
     {
         if (bPingReceived && Level.TimeSeconds > PingSendTime + TimeBetweenPings)
@@ -66,18 +67,6 @@ simulated function Tick(float DeltaTime)
             bPingReceived = False;
             Ping();
         }
-    }
-}
-
-simulated function ClientResetNetcode()
-{
-    local PlayerController PC;
-    local Timestamp_Pawn P;
-
-    PC = Level.GetLocalPlayerController();
-    ForEach PC.DynamicActors(class'Timestamp_Pawn', P)
-    {
-        P.Destroy();
     }
 }
 
@@ -137,6 +126,11 @@ function TurnOffNetcode()
 
 simulated function ServerInfoReady()
 {
+    Log("ServerInfoReady");
+    if (bool(GetServerProperty("bAllowEnhancedNetcode")))
+    {
+        FPM = Spawn(Class'FakeProjectileManager', Self);
+    }
     TimeBetweenPings = float(GetServerProperty("TimeBetweenPings"));
 }
 
